@@ -37,40 +37,40 @@ export const LeaksScreen = () => {
   ];
 
   const leakSources: LeakSource[] = [
-    { 
-      id: '1', 
-      category: 'Food Delivery', 
-      amount: 8500, 
+    {
+      id: '1',
+      category: 'Food Delivery',
+      amount: 8500,
       reason: 'Orders increased 40% vs last month',
-      backgroundColor: colors.accentYellow 
+      backgroundColor: colors.accentYellow
     },
-    { 
-      id: '2', 
-      category: 'Online Shopping', 
-      amount: 6200, 
+    {
+      id: '2',
+      category: 'Online Shopping',
+      amount: 6200,
       reason: 'Average order size going up',
-      backgroundColor: colors.accentPink 
+      backgroundColor: colors.accentPink
     },
-    { 
-      id: '3', 
-      category: 'Ride Apps', 
-      amount: 3800, 
+    {
+      id: '3',
+      category: 'Ride Apps',
+      amount: 3800,
       reason: 'Spends mostly on weekends',
-      backgroundColor: colors.accentBlue 
+      backgroundColor: colors.accentBlue
     },
-    { 
-      id: '4', 
-      category: 'Coffee Shops', 
-      amount: 2400, 
+    {
+      id: '4',
+      category: 'Coffee Shops',
+      amount: 2400,
       reason: 'Daily small purchases adding up',
-      backgroundColor: colors.accentYellow 
+      backgroundColor: colors.accentYellow
     },
-    { 
-      id: '5', 
-      category: 'Impulse Buys', 
-      amount: 1800, 
+    {
+      id: '5',
+      category: 'Impulse Buys',
+      amount: 1800,
       reason: 'Late night online orders',
-      backgroundColor: colors.accentPink 
+      backgroundColor: colors.accentPink
     },
   ];
 
@@ -106,7 +106,7 @@ export const LeaksScreen = () => {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
@@ -125,8 +125,8 @@ export const LeaksScreen = () => {
 
           <View style={styles.ghostList}>
             {ghostExpenses.map((expense) => (
-              <TouchableOpacity 
-                key={expense.id} 
+              <TouchableOpacity
+                key={expense.id}
                 style={styles.ghostRow}
                 activeOpacity={0.7}
               >
@@ -153,8 +153,8 @@ export const LeaksScreen = () => {
         </View>
         <View style={styles.leaksList}>
           {leakSources.map((leak, index) => (
-            <TouchableOpacity 
-              key={leak.id} 
+            <TouchableOpacity
+              key={leak.id}
               style={[styles.leakRow, { backgroundColor: leak.backgroundColor }]}
               activeOpacity={0.7}
             >
@@ -172,7 +172,7 @@ export const LeaksScreen = () => {
         {/* 4. EMI & Debt Monitor */}
         <Card style={styles.debtCard}>
           <Text style={styles.cardTitle}>Debt & EMI Pressure</Text>
-          
+
           <View style={styles.debtMetrics}>
             <View style={styles.debtMetricRow}>
               <Text style={styles.debtMetricLabel}>EMI to Income Ratio</Text>
@@ -193,16 +193,16 @@ export const LeaksScreen = () => {
               <View style={[styles.stressZone, { backgroundColor: '#FFF9C4', flex: 33 }]} />
               {/* High zone */}
               <View style={[styles.stressZone, { backgroundColor: '#FFCDD2', flex: 34 }]} />
-              
+
               {/* Indicator dot */}
-              <View 
+              <View
                 style={[
-                  styles.stressIndicator, 
-                  { 
+                  styles.stressIndicator,
+                  {
                     left: `${debtData.stressLevel}%`,
-                    backgroundColor: stressInfo.color 
+                    backgroundColor: stressInfo.color
                   }
-                ]} 
+                ]}
               />
             </View>
             <Text style={styles.stressVerdict}>{stressInfo.message}</Text>
@@ -213,14 +213,14 @@ export const LeaksScreen = () => {
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Risk Alerts</Text>
         </View>
-        <ScrollView 
-          horizontal 
+        <ScrollView
+          horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.alertsContainer}
         >
           {riskAlerts.map((alert, index) => (
-            <View 
-              key={index} 
+            <View
+              key={index}
               style={[
                 styles.alertChip,
                 { backgroundColor: [colors.accentYellow, colors.accentPink, colors.accentBlue, colors.accentLavender][index % 4] }
@@ -316,13 +316,13 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   statusPill: {
-    borderWidth: 1.5,
-    borderRadius: 16,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
   },
   statusText: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
   },
   sectionHeader: {
