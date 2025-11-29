@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+// Coach Screen - Chat Interface
 import {
   View,
   Text,
