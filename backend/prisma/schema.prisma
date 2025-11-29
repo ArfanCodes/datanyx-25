@@ -1,0 +1,418 @@
+// Prisma Schema for Peso - Finance Intelligence App
+// Production-ready schema with comprehensive features
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+  EMI
+  SUBSCRIPTION
+}
+
+enum ExpenseType {
+  FIXED      // Rent, EMI, Insurance
+  VARIABLE   // Food, Entertainment, Shopping
+}
+
+enum RiskTolerance {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum LeakSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum LeakFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+}
+
+enum StabilityMode {
+  STABLE      // Green - All good
+  MODERATE    // Yellow - Watch out
+  UNSTABLE    // Orange - Take action
+  EMERGENCY   // Red - Critical
+}
+
+enum CoachMode {
+  SAVER       // Focus on saving
+  INVESTOR    // Focus on investments
+  DEBT_FREE   // Focus on clearing debt
+  BALANCED    // Balanced approach
+  EMERGENCY   // Emergency mode - strict budgeting
+}
+
+enum FinancialGoal {
+  SAVE_EMERGENCY
+  BUY_HOME
+  RETIREMENT
+  DEBT_FREE
+  INVESTMENT
+  EDUCATION
+  TRAVEL
+  WEDDING
+  BUSINESS
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAUSED
+  CANCELLED
+}
+
+// ============================================================================
+// USER & AUTHENTICATION
+// ============================================================================
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String?
+  phone     String?
+  avatar    String?
+  
+  // Onboarding status
+  isOnboarded Boolean @default(false)
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  lastLogin DateTime?
+
+  // Relations
+  profile         Profile?
+  transactions    Transaction[]
+  emis            EMI[]
+  subscriptions   Subscription[]
+  leaks           Leak[]
+  stabilityLogs   StabilityLog[]
+  budgets         Budget[]
+  savingsGoals    SavingsGoal[]
+  notifications   Notification[]
+
+  @@map("users")
+  @@index([email])
+}
+
+// ============================================================================
+// PROFILE & ONBOARDING
+// ============================================================================
+
+model Profile {
+  id       String @id @default(uuid())
+  userId   String @unique
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Financial Information
+  monthlyIncome    Float
+  currency         String   @default("INR")
+  financialGoals   FinancialGoal[]
+  riskTolerance    RiskTolerance @default(MEDIUM)
+  
+  // Personal Information
+  age              Int?
+  occupation       String?
+  city             String?
+  phone            String?
+  creditScore      Int?
+  dependents       Int      @default(0)
+  
+  // Coach Settings
+  currentCoachMode CoachMode @default(BALANCED)
+  emergencyFund    Float     @default(0)
+  
+  // Preferences
+  notificationsEnabled Boolean @default(true)
+  darkMode             Boolean @default(false)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("profiles")
+  @@index([userId])
+}
+
+// ============================================================================
+// TRANSACTIONS
+// ============================================================================
+
+model Transaction {
+  id          String          @id @default(uuid())
+  userId      String
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Transaction Details
+  amount      Float
+  category    String
+  type        TransactionType
+  expenseType ExpenseType?    // Only for expenses
+  description String?
+  notes       String?
+  
+  // Metadata
+  date        DateTime        @default(now())
+  isRecurring Boolean         @default(false)
+  tags        String[]
+  
+  // Attachments
+  receipt     String?         // URL to receipt image
+  
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@map("transactions")
+  @@index([userId])
+  @@index([date])
+  @@index([type])
+  @@index([category])
+}
+
+// ============================================================================
+// EMI & LOANS
+// ============================================================================
+
+model EMI {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // EMI Details
+  name            String   // e.g., "Home Loan", "Car Loan"
+  principalAmount Float
+  interestRate    Float
+  tenure          Int      // in months
+  monthlyEMI      Float
+  
+  // Status
+  startDate       DateTime
+  endDate         DateTime
+  paidInstallments Int     @default(0)
+  remainingAmount Float
+  
+  // Metadata
+  lender          String?
+  accountNumber   String?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("emis")
+  @@index([userId])
+  @@index([endDate])
+}
+
+// ============================================================================
+// SUBSCRIPTIONS
+// ============================================================================
+
+model Subscription {
+  id              String             @id @default(uuid())
+  userId          String
+  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Subscription Details
+  name            String             // e.g., "Netflix", "Spotify"
+  amount          Float
+  billingCycle    LeakFrequency      // MONTHLY, QUARTERLY, etc.
+  category        String
+  
+  // Status
+  status          SubscriptionStatus @default(ACTIVE)
+  startDate       DateTime
+  nextBillingDate DateTime
+  
+  // Metadata
+  website         String?
+  logo            String?
+  autoRenew       Boolean            @default(true)
+  
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@map("subscriptions")
+  @@index([userId])
+  @@index([status])
+  @@index([nextBillingDate])
+}
+
+// ============================================================================
+// LEAK DETECTION
+// ============================================================================
+
+model Leak {
+  id          String        @id @default(uuid())
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Leak Details
+  category    String
+  amount      Float
+  frequency   LeakFrequency
+  description String
+  severity    LeakSeverity
+  
+  // Impact Analysis
+  monthlyImpact  Float        // How much this costs per month
+  yearlyImpact   Float        // Annual cost
+  suggestion     String?      // AI-generated suggestion to fix
+  
+  // Status
+  isResolved     Boolean      @default(false)
+  resolvedAt     DateTime?
+  
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@map("leaks")
+  @@index([userId])
+  @@index([severity])
+  @@index([isResolved])
+}
+
+// ============================================================================
+// STABILITY TRACKING
+// ============================================================================
+
+model StabilityLog {
+  id              String        @id @default(uuid())
+  userId          String
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Stability Metrics
+  stabilityScore  Float         // 0-100
+  mode            StabilityMode
+  
+  // Component Scores
+  incomeStability Float         // Variance in income
+  expensePattern  Float         // Consistency of expenses
+  savingsRate     Float         // % of income saved
+  debtRatio       Float?        // Debt to income ratio
+  emergencyFund   Float?        // Months of expenses covered
+  
+  // Insights
+  insights        String[]      // AI-generated insights
+  recommendations String[]      // Actionable recommendations
+  
+  // Period
+  month           DateTime
+  createdAt       DateTime      @default(now())
+
+  @@map("stability_logs")
+  @@index([userId])
+  @@index([month])
+  @@index([mode])
+}
+
+// ============================================================================
+// BUDGETS
+// ============================================================================
+
+model Budget {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Budget Details
+  category    String
+  limit       Float
+  spent       Float    @default(0)
+  period      String   @default("monthly") // weekly, monthly, yearly
+  
+  // Alerts
+  alertAt     Float?   // Alert when spent reaches this %
+  
+  // Period
+  startDate   DateTime
+  endDate     DateTime
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("budgets")
+  @@index([userId])
+  @@index([category])
+  @@index([endDate])
+}
+
+// ============================================================================
+// SAVINGS GOALS
+// ============================================================================
+
+model SavingsGoal {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Goal Details
+  name          String
+  targetAmount  Float
+  currentAmount Float    @default(0)
+  deadline      DateTime?
+  
+  // Metadata
+  category      FinancialGoal
+  priority      Int      @default(1) // 1-5
+  icon          String?
+  
+  // Status
+  isCompleted   Boolean  @default(false)
+  completedAt   DateTime?
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("savings_goals")
+  @@index([userId])
+  @@index([isCompleted])
+}
+
+// ============================================================================
+// NOTIFICATIONS
+// ============================================================================
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Notification Details
+  title     String
+  message   String
+  type      String   // leak_detected, bill_due, goal_achieved, etc.
+  
+  // Status
+  isRead    Boolean  @default(false)
+  readAt    DateTime?
+  
+  // Metadata
+  actionUrl String?
+  icon      String?
+  
+  createdAt DateTime @default(now())
+
+  @@map("notifications")
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+}
