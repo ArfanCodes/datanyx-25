@@ -6,7 +6,7 @@ import { BottomTabs } from './BottomTabs';
 import { LoginScreen } from '../screens/Auth/LoginScreen';
 import { SignupScreen } from '../screens/Auth/SignupScreen';
 import { ProfileSetupScreen } from '../screens/ProfileSetup/ProfileSetupScreen';
-import { EmergencyScreen } from '../screens/Emergency/EmergencyScreen';
+import { EmergencyModeScreen } from '../screens/Emergency/EmergencyModeScreen';
 import { colors } from '../utils/colors';
 import { useAuthStore } from '../store/authStore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -55,8 +55,8 @@ const MainNavigator = () => {
     >
       <AppStack.Screen name="Main" component={BottomTabs} />
       <AppStack.Screen
-        name="Emergency"
-        component={EmergencyScreen}
+        name="EmergencyMode"
+        component={EmergencyModeScreen}
         options={{
           presentation: 'modal',
           headerShown: true,

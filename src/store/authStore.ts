@@ -46,8 +46,14 @@ export const useAuthStore = create<AuthState>((set) => ({
       await AsyncStorage.setItem(TOKEN_KEY, mockToken);
       await AsyncStorage.setItem(USER_KEY, JSON.stringify(mockUser));
       
-      // Reset onboarding flag to ensure user goes through profile setup
-      await AsyncStorage.setItem('@peso_profile_setup_complete', 'false');
+      // Check if user is admin - bypass onboarding
+      if (email.toLowerCase() === 'admin') {
+        // Admin bypasses onboarding and goes directly to home
+        await AsyncStorage.setItem('@peso_profile_setup_complete', 'true');
+      } else {
+        // Regular users must go through profile setup
+        await AsyncStorage.setItem('@peso_profile_setup_complete', 'false');
+      }
 
       set({
         token: mockToken,
