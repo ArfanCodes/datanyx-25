@@ -34,12 +34,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   primary: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.buttonGreen,
   },
   secondary: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: colors.primary,
+    borderColor: colors.buttonGreen,
   },
   text: {
     fontSize: 16,
@@ -49,6 +49,6 @@ const styles = StyleSheet.create({
     color: colors.white,
   },
   textSecondary: {
-    color: colors.primary,
+    color: colors.buttonGreen,
   },
 });

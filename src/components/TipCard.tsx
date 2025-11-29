@@ -19,11 +19,11 @@ export const TipCard: React.FC<TipCardProps> = ({ tip }) => {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#E3F2FD',
+    backgroundColor: colors.accentLavender,
   },
   label: {
     fontSize: 12,
-    color: colors.primary,
+    color: colors.buttonGreen,
     fontWeight: '700',
     marginBottom: spacing.xs,
     textTransform: 'uppercase',

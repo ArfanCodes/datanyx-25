@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
   },
   iconContainer: {
     marginRight: spacing.md,
-    backgroundColor: '#FFEBEE',
+    backgroundColor: colors.accentPink,
     padding: spacing.sm,
     borderRadius: 8,
   },
