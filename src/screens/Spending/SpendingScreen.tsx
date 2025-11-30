@@ -1,8 +1,9 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { TrendingUp, TrendingDown, ShoppingBag, Utensils, CreditCard, Home as HomeIcon, Zap, DollarSign } from 'lucide-react-native';
 import { Card } from '../../components/Card';
+import { CircularProgress } from '../../components/CircularProgress';
 import { colors } from '../../utils/colors';
 
 // Category colors (soft pastels)
@@ -17,8 +18,10 @@ const CATEGORY_COLORS = {
 
 export const SpendingScreen = () => {
   // Mock data - replace with actual data from API/store
+  const [monthlyBudget, setMonthlyBudget] = useState(25000); // Set to 0 to test fallback state
+
   const monthlyData = {
-    totalSpent: 45200,
+    totalSpent: 18400,
     incomeReceived: 65000,
     remainingBalance: 19800,
   };
@@ -58,9 +61,12 @@ export const SpendingScreen = () => {
     { id: '5', merchant: 'Electricity Bill', category: 'Bills', amount: 3500, time: '3 days ago' },
   ];
 
+  // Calculate percentage for circular progress
+  const percentageUsed = monthlyBudget > 0 ? (monthlyData.totalSpent / monthlyBudget) * 100 : 0;
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
@@ -70,7 +76,35 @@ export const SpendingScreen = () => {
           <Text style={styles.headerSubtitle}>Track where your money went this month.</Text>
         </View>
 
-        {/* 2. Monthly Summary */}
+        {/* 2. Circular Spending Progress */}
+        <Card style={styles.progressCard}>
+          <Text style={styles.progressTitle}>Spending Overview</Text>
+
+          {monthlyBudget > 0 ? (
+            <View style={styles.progressContent}>
+              <CircularProgress
+                percentage={percentageUsed}
+                spent={monthlyData.totalSpent}
+                budget={monthlyBudget}
+                size={160}
+              />
+            </View>
+          ) : (
+            <View style={styles.noBudgetContainer}>
+              <Text style={styles.noBudgetText}>
+                Set a monthly budget to track your spending.
+              </Text>
+              <TouchableOpacity
+                style={styles.setBudgetButton}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.setBudgetButtonText}>Set Budget</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </Card>
+
+        {/* 3. Monthly Summary */}
         <Card style={styles.summaryCard}>
           <View style={styles.summaryRow}>
             <View style={styles.summaryItem}>
@@ -99,8 +133,8 @@ export const SpendingScreen = () => {
           {categoryData.map((category) => {
             const IconComponent = category.icon;
             return (
-              <View 
-                key={category.name} 
+              <View
+                key={category.name}
                 style={[
                   styles.categoryCard,
                   { backgroundColor: CATEGORY_COLORS[category.name as keyof typeof CATEGORY_COLORS] }
@@ -118,7 +152,7 @@ export const SpendingScreen = () => {
         {/* 4. Budget Split vs Reality */}
         <Card style={styles.budgetCard}>
           <Text style={styles.budgetTitle}>Budget Split vs Reality</Text>
-          
+
           <View style={styles.budgetRow}>
             <Text style={styles.budgetLabel}>Essentials</Text>
             <View style={styles.budgetBarContainer}>
@@ -171,14 +205,14 @@ export const SpendingScreen = () => {
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Spending Patterns</Text>
         </View>
-        <ScrollView 
-          horizontal 
+        <ScrollView
+          horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.patternsContainer}
         >
           {spendingPatterns.map((pattern, index) => (
-            <View 
-              key={index} 
+            <View
+              key={index}
               style={[
                 styles.patternChip,
                 { backgroundColor: [colors.accentYellow, colors.accentPink, colors.accentBlue][index % 3] }
@@ -232,6 +266,46 @@ const styles = StyleSheet.create({
   headerSubtitle: {
     fontSize: 16,
     color: '#666666',
+  },
+  progressCard: {
+    paddingVertical: 24,
+    paddingHorizontal: 20,
+    marginBottom: 24,
+    alignItems: 'center',
+  },
+  progressTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.textDark,
+    marginBottom: 20,
+    alignSelf: 'flex-start',
+  },
+  progressContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+  },
+  noBudgetContainer: {
+    alignItems: 'center',
+    paddingVertical: 30,
+  },
+  noBudgetText: {
+    fontSize: 15,
+    color: '#6B6B6B',
+    textAlign: 'center',
+    marginBottom: 20,
+    paddingHorizontal: 20,
+  },
+  setBudgetButton: {
+    backgroundColor: colors.buttonGreen,
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+    borderRadius: 14,
+  },
+  setBudgetButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
   summaryCard: {
     paddingVertical: 20,

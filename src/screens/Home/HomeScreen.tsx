@@ -10,9 +10,16 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Edit2, X, Check } from 'lucide-react-native';
+import { Edit2, X, Check, Trophy, Gift } from 'lucide-react-native';
 import { colors } from '../../utils/colors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useGamification } from '../../contexts/GamificationContext';
+import { StreakBadge } from '../../components/StreakBadge';
+import { MicroWinCard } from '../../components/MicroWinCard';
+import { Mascot } from '../../components/Mascot';
+import { AchievementUnlockModal } from '../../components/AchievementUnlockModal';
+import { UnexpectedEventButton } from '../../components/UnexpectedEventButton';
+import { Achievements } from '../../types/gamification';
 
 interface FixedExpense {
   name: string;
@@ -35,15 +42,31 @@ export const HomeScreen = ({ navigation }: any) => {
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [currentSalary, setCurrentSalary] = useState(0);
   const [fixedExpenses, setFixedExpenses] = useState<FixedExpense[]>([]);
-  
+
   // Edit modal state
   const [showEditModal, setShowEditModal] = useState(false);
   const [editedSalary, setEditedSalary] = useState('');
   const [updatePermanently, setUpdatePermanently] = useState(false);
 
+  // Micro-Savings State
+  const [showMicroSavingCard, setShowMicroSavingCard] = useState(false);
+  const [suggestedSaving, setSuggestedSaving] = useState(0);
+  const [showAddExpenseModal, setShowAddExpenseModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [expenseAmount, setExpenseAmount] = useState('');
+
+  // Recovery Plan State
+  const [hasRecoveryPlan, setHasRecoveryPlan] = useState(false);
+
+  // Gamification
+  const { profile: gamificationProfile, addMicroSaving, unlockAchievement, updateStreakOnAction } = useGamification();
+  const [showAchievementModal, setShowAchievementModal] = useState(false);
+  const [unlockedAchievement, setUnlockedAchievement] = useState<keyof Achievements | null>(null);
+
   // Load profile data
   useEffect(() => {
     loadProfileData();
+    checkRecoveryPlanStatus();
   }, []);
 
   const loadProfileData = async () => {
@@ -53,7 +76,7 @@ export const HomeScreen = ({ navigation }: any) => {
         const parsed: ProfileData = JSON.parse(data);
         setProfileData(parsed);
         setCurrentSalary(parsed.monthlySalary);
-        
+
         // Load fixed expenses with completion status
         const expenses = parsed.fixedExpenses.map(exp => ({
           ...exp,
@@ -66,6 +89,15 @@ export const HomeScreen = ({ navigation }: any) => {
     }
   };
 
+  const checkRecoveryPlanStatus = async () => {
+    try {
+      const recoveryPlanActive = await AsyncStorage.getItem('@peso_recovery_plan_active');
+      setHasRecoveryPlan(recoveryPlanActive === 'true');
+    } catch (error) {
+      console.error('Failed to check recovery plan status:', error);
+    }
+  };
+
   const handleEditSalary = () => {
     setEditedSalary(currentSalary.toString());
     setUpdatePermanently(false);
@@ -74,7 +106,7 @@ export const HomeScreen = ({ navigation }: any) => {
 
   const handleSaveSalary = async () => {
     const newSalary = parseInt(editedSalary, 10);
-    
+
     if (isNaN(newSalary) || newSalary <= 0) {
       Alert.alert('Invalid Amount', 'Please enter a valid salary amount.');
       return;
@@ -95,19 +127,23 @@ export const HomeScreen = ({ navigation }: any) => {
     setShowEditModal(false);
   };
 
-  const toggleExpenseCompletion = (index: number) => {
+  const toggleExpenseCompletion = async (index: number) => {
     const updated = [...fixedExpenses];
     updated[index].completed = !updated[index].completed;
     setFixedExpenses(updated);
-  };
 
-  // Micro-Savings State
-  const [showMicroSavingCard, setShowMicroSavingCard] = useState(false);
-  const [suggestedSaving, setSuggestedSaving] = useState(0);
-  const [monthlyMicroSavingsTotal, setMonthlyMicroSavingsTotal] = useState(0);
-  const [showAddExpenseModal, setShowAddExpenseModal] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [expenseAmount, setExpenseAmount] = useState('');
+    // If completing an expense, trigger streak update
+    if (updated[index].completed) {
+      await updateStreakOnAction();
+
+      // Check for first win achievement
+      if (!gamificationProfile.achievements.firstWin) {
+        await unlockAchievement('firstWin');
+        setUnlockedAchievement('firstWin');
+        setShowAchievementModal(true);
+      }
+    }
+  };
 
   // Round-up calculation
   const getRoundUpSaving = (amount: number): number => {
@@ -119,14 +155,14 @@ export const HomeScreen = ({ navigation }: any) => {
   // Handle Add Expense
   const handleAddExpense = () => {
     const amount = parseInt(expenseAmount, 10);
-    
+
     if (isNaN(amount) || amount <= 0) {
       Alert.alert('Invalid Amount', 'Please enter a valid expense amount.');
       return;
     }
 
     const roundUpSaving = getRoundUpSaving(amount);
-    
+
     setExpenseAmount('');
     setShowAddExpenseModal(false);
 
@@ -139,12 +175,8 @@ export const HomeScreen = ({ navigation }: any) => {
 
   // Handle Save Micro-Saving
   const handleSaveMicroSaving = async () => {
-    // Add to monthly total
-    const newTotal = monthlyMicroSavingsTotal + suggestedSaving;
-    setMonthlyMicroSavingsTotal(newTotal);
-
-    // Save to AsyncStorage
-    await AsyncStorage.setItem('@peso_micro_savings_total', newTotal.toString());
+    // Use gamification context to add micro-saving
+    await addMicroSaving(suggestedSaving);
 
     // Hide the card and show success modal
     setShowMicroSavingCard(false);
@@ -157,28 +189,13 @@ export const HomeScreen = ({ navigation }: any) => {
     setSuggestedSaving(0);
   };
 
-  // Load micro-savings total on mount
-  useEffect(() => {
-    const loadMicroSavings = async () => {
-      try {
-        const total = await AsyncStorage.getItem('@peso_micro_savings_total');
-        if (total) {
-          setMonthlyMicroSavingsTotal(parseInt(total, 10));
-        }
-      } catch (error) {
-        console.error('Failed to load micro-savings:', error);
-      }
-    };
-    loadMicroSavings();
-  }, []);
-
   // Calculate Stability Score
   const calculateStabilityScore = (): { score: number; status: string; color: string; badgeBg: string } => {
     if (!profileData) return { score: 0, status: 'No Data', color: '#9A9A9A', badgeBg: '#F4F4F4' };
 
     const totalFixedExpenses = fixedExpenses.reduce((sum, exp) => sum + exp.amount, 0);
     const incomeVsExpenseRatio = currentSalary > 0 ? (currentSalary - totalFixedExpenses) / currentSalary : 0;
-    const savingsRatio = currentSalary > 0 ? monthlyMicroSavingsTotal / currentSalary : 0;
+    const savingsRatio = currentSalary > 0 ? gamificationProfile.monthlyMicroSavingsTotal / currentSalary : 0;
     const expenseCoverage = totalFixedExpenses > 0 ? currentSalary / totalFixedExpenses : 0;
 
     // Calculate score (0-100)
@@ -214,22 +231,43 @@ export const HomeScreen = ({ navigation }: any) => {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView 
+      <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Your month at a glance</Text>
-          <Text style={styles.headerSubtitle}>Control your income and fixed expenses here.</Text>
+          <View style={styles.headerLeft}>
+            <Text style={styles.headerTitle}>Your month at a glance</Text>
+            <Text style={styles.headerSubtitle}>Control your income and fixed expenses here.</Text>
+          </View>
+          <View style={styles.headerRight}>
+            <TouchableOpacity
+              style={styles.iconButton}
+              onPress={() => navigation.navigate('Achievements')}
+              activeOpacity={0.7}
+            >
+              <Trophy size={24} color={colors.buttonGreen} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.iconButton}
+              onPress={() => navigation.navigate('RewardsStore')}
+              activeOpacity={0.7}
+            >
+              <Gift size={24} color={colors.buttonGreen} />
+            </TouchableOpacity>
+          </View>
         </View>
+
+        {/* Streak Badge */}
+        <StreakBadge />
 
         {/* Editable Income Card */}
         <View style={styles.incomeCard}>
           <View style={styles.incomeHeader}>
             <Text style={styles.incomeLabel}>Monthly Income</Text>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.editButton}
               onPress={handleEditSalary}
               activeOpacity={0.7}
@@ -251,21 +289,21 @@ export const HomeScreen = ({ navigation }: any) => {
               </Text>
             </View>
           </View>
-          
+
           <View style={styles.stabilityScoreContainer}>
             <Text style={styles.stabilityScore}>{stabilityData.score}</Text>
             <Text style={styles.stabilityScoreMax}>/100</Text>
           </View>
 
           <View style={styles.stabilityProgressBar}>
-            <View 
+            <View
               style={[
-                styles.stabilityProgressFill, 
-                { 
+                styles.stabilityProgressFill,
+                {
                   width: `${stabilityData.score}%`,
-                  backgroundColor: stabilityData.color 
+                  backgroundColor: stabilityData.color
                 }
-              ]} 
+              ]}
             />
           </View>
 
@@ -316,47 +354,46 @@ export const HomeScreen = ({ navigation }: any) => {
         </View>
 
         {/* Micro-Savings Indicator */}
-        {monthlyMicroSavingsTotal > 0 && (
+        {gamificationProfile.monthlyMicroSavingsTotal > 0 && (
           <View style={styles.microSavingsIndicator}>
             <Text style={styles.microSavingsIcon}>⚡</Text>
             <Text style={styles.microSavingsText}>
-              Micro-savings this month: <Text style={styles.microSavingsAmount}>₹{monthlyMicroSavingsTotal.toLocaleString('en-IN')}</Text>
+              Micro-savings this month: <Text style={styles.microSavingsAmount}>₹{gamificationProfile.monthlyMicroSavingsTotal.toLocaleString('en-IN')}</Text>
             </Text>
           </View>
         )}
 
-        {/* Micro-Achievement Card */}
+        {/* Micro-Win Card */}
         {showMicroSavingCard && (
-          <View style={styles.microAchievementCard}>
-            <View style={styles.microAchievementHeader}>
-              <Text style={styles.microAchievementIcon}>🎯</Text>
-              <View style={styles.microAchievementTextContainer}>
-                <Text style={styles.microAchievementTitle}>
-                  Nice! You could save ₹{suggestedSaving} from that spend.
-                </Text>
-                <Text style={styles.microAchievementSubtitle}>
-                  Round it up and we'll move ₹{suggestedSaving} to your Safety pot.
-                </Text>
-              </View>
-            </View>
-            <View style={styles.microAchievementButtons}>
-              <TouchableOpacity
-                style={styles.microSaveButton}
-                onPress={handleSaveMicroSaving}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.microSaveButtonText}>Save ₹{suggestedSaving}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.microDismissButton}
-                onPress={handleDismissMicroSaving}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.microDismissButtonText}>Not now</Text>
-              </TouchableOpacity>
+          <MicroWinCard
+            suggestedSaving={suggestedSaving}
+            onSave={handleSaveMicroSaving}
+            onDismiss={handleDismissMicroSaving}
+          />
+        )}
+
+        {/* Mascot */}
+        <View style={styles.mascotContainer}>
+          <Mascot size="medium" />
+        </View>
+
+        {/* Recovery Plan Banner */}
+        {hasRecoveryPlan && (
+          <View style={styles.recoveryBanner}>
+            <Text style={styles.recoveryBannerIcon}>📋</Text>
+            <View style={styles.recoveryBannerTextContainer}>
+              <Text style={styles.recoveryBannerTitle}>Recovery Plan Active</Text>
+              <Text style={styles.recoveryBannerText}>
+                Recent unexpected event logged — follow your recovery plan
+              </Text>
             </View>
           </View>
         )}
+
+        {/* Unexpected Event Button */}
+        <UnexpectedEventButton
+          onPress={() => navigation.navigate('LogUnexpectedEvent')}
+        />
 
         {/* Emergency Mode (Job Loss Mode) Button */}
         <TouchableOpacity
@@ -540,6 +577,16 @@ export const HomeScreen = ({ navigation }: any) => {
           </View>
         </View>
       </Modal>
+
+      {/* Achievement Unlock Modal */}
+      <AchievementUnlockModal
+        visible={showAchievementModal}
+        achievementKey={unlockedAchievement}
+        onClose={() => {
+          setShowAchievementModal(false);
+          setUnlockedAchievement(null);
+        }}
+      />
     </SafeAreaView>
   );
 };
@@ -553,12 +600,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 24,
     paddingTop: 24,
     paddingBottom: 100,
   },
   header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    paddingHorizontal: 24,
     marginBottom: 28,
+  },
+  headerLeft: {
+    flex: 1,
   },
   headerTitle: {
     fontSize: 26,
@@ -572,7 +625,19 @@ const styles = StyleSheet.create({
     color: '#6B6B6B',
     lineHeight: 22,
   },
-  
+  headerRight: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  iconButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#F4F4F4',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
   // Income Card
   incomeCard: {
     backgroundColor: '#FFFFFF',
@@ -702,7 +767,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 24,
     marginHorizontal: 16,
-    marginBottom: 0,
+    marginBottom: 24,
     borderWidth: 1,
     borderColor: '#E8E8E8',
     shadowColor: 'rgba(0, 0, 0, 0.08)',
@@ -789,6 +854,12 @@ const styles = StyleSheet.create({
     opacity: 0.4,
   },
 
+  // Mascot Container
+  mascotContainer: {
+    marginHorizontal: 16,
+    marginBottom: 24,
+  },
+
   // Emergency Mode Card
   emergencyModeCard: {
     flexDirection: 'row',
@@ -797,7 +868,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 24,
     marginHorizontal: 16,
-    marginTop: 24,
+    marginBottom: 24,
     shadowColor: 'rgba(0, 0, 0, 0.08)',
     shadowOffset: {
       width: 0,
@@ -965,7 +1036,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     marginHorizontal: 16,
-    marginTop: 24,
     marginBottom: 24,
     gap: 12,
   },
@@ -982,86 +1052,6 @@ const styles = StyleSheet.create({
   microSavingsAmount: {
     fontWeight: '700',
     color: '#32D483',
-  },
-
-  // Micro-Achievement Card
-  microAchievementCard: {
-    backgroundColor: '#EDE9FF',
-    borderRadius: 16,
-    padding: 20,
-    marginHorizontal: 16,
-    marginTop: 20,
-    borderWidth: 1.5,
-    borderColor: '#D4C5F9',
-    shadowColor: '#000000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  microAchievementHeader: {
-    flexDirection: 'row',
-    gap: 14,
-    marginBottom: 16,
-  },
-  microAchievementIcon: {
-    fontSize: 28,
-  },
-  microAchievementTextContainer: {
-    flex: 1,
-  },
-  microAchievementTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#1A1A1A',
-    marginBottom: 6,
-    lineHeight: 22,
-  },
-  microAchievementSubtitle: {
-    fontSize: 14,
-    color: '#6B6B6B',
-    lineHeight: 20,
-  },
-  microAchievementButtons: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  microSaveButton: {
-    flex: 1,
-    backgroundColor: '#32D483',
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#32D483',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 3,
-  },
-  microSaveButtonText: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  microDismissButton: {
-    flex: 1,
-    backgroundColor: 'transparent',
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  microDismissButtonText: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#6B6B6B',
   },
 
   // Add Expense Button
@@ -1086,81 +1076,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: '#FFFFFF',
-  },
-
-  // Shared Card Title
-  cardTitle: {
-    fontSize: 19,
-    fontWeight: '700',
-    color: '#1A1A1A',
-    letterSpacing: -0.3,
-  },
-
-  // Miscellaneous Expenses Card
-  miscExpensesCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 18,
-    padding: 24,
-    marginBottom: 24,
-    borderWidth: 1,
-    borderColor: '#E8E8E8',
-    shadowColor: '#000000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.04,
-    shadowRadius: 10,
-    elevation: 2,
-  },
-  miscExpensesHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 18,
-  },
-  miscExpensesTotal: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#32D483',
-  },
-  miscExpensesList: {
-    gap: 0,
-  },
-  miscExpenseRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 14,
-  },
-  miscExpenseDivider: {
-    height: 1,
-    backgroundColor: '#F4F4F4',
-  },
-  miscExpenseLeft: {
-    flex: 1,
-  },
-  miscExpenseCategory: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1A1A1A',
-    marginBottom: 4,
-  },
-  miscExpenseTimestamp: {
-    fontSize: 12,
-    color: '#9A9A9A',
-  },
-  miscExpenseAmount: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#1A1A1A',
-  },
-  emptyMiscExpenses: {
-    fontSize: 14,
-    color: '#9A9A9A',
-    textAlign: 'center',
-    paddingVertical: 20,
-    fontStyle: 'italic',
   },
 
   // Success Modal
@@ -1231,7 +1146,38 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     textTransform: 'uppercase',
   },
-  
+
+  // Recovery Plan Banner
+  recoveryBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E8F8F0',
+    borderRadius: 16,
+    padding: 16,
+    marginHorizontal: 16,
+    marginBottom: 24,
+    borderWidth: 2,
+    borderColor: '#32D483',
+  },
+  recoveryBannerIcon: {
+    fontSize: 24,
+    marginRight: 12,
+  },
+  recoveryBannerTextContainer: {
+    flex: 1,
+  },
+  recoveryBannerTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#1A1A1A',
+    marginBottom: 4,
+  },
+  recoveryBannerText: {
+    fontSize: 13,
+    color: '#6B6B6B',
+    lineHeight: 18,
+  },
+
   bottomPadding: {
     height: 120,
   },

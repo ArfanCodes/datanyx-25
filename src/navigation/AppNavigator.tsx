@@ -7,6 +7,10 @@ import { LoginScreen } from '../screens/Auth/LoginScreen';
 import { SignupScreen } from '../screens/Auth/SignupScreen';
 import { ProfileSetupScreen } from '../screens/ProfileSetup/ProfileSetupScreen';
 import { EmergencyModeScreen } from '../screens/Emergency/EmergencyModeScreen';
+import { AchievementsScreen } from '../screens/Achievements/AchievementsScreen';
+import { RewardsStoreScreen } from '../screens/Rewards/RewardsStoreScreen';
+import { LogUnexpectedEventScreen } from '../screens/UnexpectedEvent/LogUnexpectedEventScreen';
+import { RecoveryPlanScreen } from '../screens/UnexpectedEvent/RecoveryPlanScreen';
 import { colors } from '../utils/colors';
 import { useAuthStore } from '../store/authStore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -62,6 +66,34 @@ const MainNavigator = () => {
           headerShown: true,
           title: 'Emergency Mode',
           headerTintColor: colors.crisis,
+        }}
+      />
+      <AppStack.Screen
+        name="Achievements"
+        component={AchievementsScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <AppStack.Screen
+        name="RewardsStore"
+        component={RewardsStoreScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <AppStack.Screen
+        name="LogUnexpectedEvent"
+        component={LogUnexpectedEventScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <AppStack.Screen
+        name="RecoveryPlan"
+        component={RecoveryPlanScreen}
+        options={{
+          headerShown: false,
         }}
       />
     </AppStack.Navigator>

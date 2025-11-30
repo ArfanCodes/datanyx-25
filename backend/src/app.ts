@@ -9,6 +9,7 @@ import profileRoutes from './routes/profile.routes';
 import transactionRoutes from './routes/transactions.routes';
 import leakRoutes from './routes/leaks.routes';
 import stabilityRoutes from './routes/stability.routes';
+import gamificationRoutes from './routes/gamification.routes';
 
 const app: Application = express();
 
@@ -28,6 +29,7 @@ app.use('/api/profile', profileRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/leaks', leakRoutes);
 app.use('/api/stability', stabilityRoutes);
+app.use('/api/gamification', gamificationRoutes);
 
 // Error handling
 app.use(notFoundHandler);

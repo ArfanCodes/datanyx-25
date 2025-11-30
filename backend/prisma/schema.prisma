@@ -146,6 +146,13 @@ model Profile {
   notificationsEnabled Boolean @default(true)
   darkMode             Boolean @default(false)
   
+  // Gamification Fields
+  streakCount              Int      @default(0)
+  bestStreak               Int      @default(0)
+  lastActiveDate           DateTime?
+  monthlyMicroSavingsTotal Int      @default(0)
+  achievements             Json     @default("{\"firstWin\": false, \"stabilityStarter\": false, \"leakHunter\": false, \"consistencyHero\": false, \"saverSpark\": false}")
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
