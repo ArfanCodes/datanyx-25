@@ -171,21 +171,75 @@ Engagement system featuring:
 
 ---
 
-## 🤝 Contributing
+## ⚖️ License & Legal Notice
 
-Contributions are welcome! Please follow these steps:
+### **© 2025 Peso Financial Intelligence Platform. All Rights Reserved.**
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+This software and associated documentation files (the "Software") are **proprietary and confidential**. Unauthorized copying, modification, distribution, or use of this Software, via any medium, is **strictly prohibited** and constitutes a violation of intellectual property rights.
+
+### **TERMS OF USE**
+
+#### ✅ **PERMITTED:**
+- **Viewing Only** - You may view the source code for educational and reference purposes only
+- **Personal Learning** - Study the architecture and implementation for personal knowledge
+
+#### ❌ **STRICTLY PROHIBITED:**
+- **NO Modifications** - Altering, adapting, or creating derivative works
+- **NO Distribution** - Sharing, publishing, or redistributing the code
+- **NO Commercial Use** - Using any part of this software for commercial purposes
+- **NO Contributions** - Pull requests and contributions are not accepted
+- **NO Forking** - Creating copies or forks of this repository
+- **NO Reverse Engineering** - Decompiling or attempting to extract source code from compiled versions
+
+### **COPYRIGHT PROTECTION**
+
+This Software is protected by:
+- **Copyright Laws** - International copyright treaties and conventions
+- **Intellectual Property Rights** - Patents pending and trade secrets
+- **Digital Millennium Copyright Act (DMCA)** - United States federal law
+- **Berne Convention** - International copyright protection
+
+### **LEGAL CONSEQUENCES**
+
+**⚠️ WARNING: Violation of these terms will result in immediate legal action.**
+
+Any unauthorized use, reproduction, modification, or distribution of this Software will be prosecuted to the fullest extent of the law, including but not limited to:
+
+- **Civil Litigation** - Lawsuits for damages, injunctive relief, and attorney fees
+- **Criminal Prosecution** - Where applicable under copyright and computer fraud laws
+- **Financial Penalties** - Statutory damages up to $150,000 per infringement (U.S. Copyright Law)
+- **Injunctive Relief** - Court orders to cease and desist all infringing activities
+- **Account Termination** - Immediate removal from GitHub and associated platforms
+
+### **PLAGIARISM DETECTION**
+
+We actively monitor for unauthorized use through:
+- Automated code similarity detection tools
+- DMCA takedown notices
+- Legal counsel specializing in intellectual property
+- Collaboration with GitHub's legal team
+
+**Any instance of plagiarism or unauthorized use will be met with swift and decisive legal action.**
+
+### **CONTACT FOR LICENSING**
+
+For inquiries regarding commercial licensing, partnerships, or authorized use:
+- **Email:** legal@peso-finance.com
+- **Legal Team:** Peso Legal Department
+
+**Unauthorized contact or attempts to circumvent these restrictions will be documented and may be used as evidence in legal proceedings.**
 
 ---
 
-## 📄 License
+## � No Contributions Accepted
 
-This project is licensed under the MIT License.
+This is a **closed-source project**. We do **NOT** accept:
+- Pull requests
+- Feature suggestions
+- Bug reports from external parties
+- Code contributions of any kind
+
+**Any unsolicited contributions will be rejected and may be considered an attempt to claim ownership of intellectual property.**
 
 ---
 
