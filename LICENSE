@@ -1,0 +1,235 @@
+PROPRIETARY SOFTWARE LICENSE AGREEMENT
+
+Copyright © 2025 Peso Financial Intelligence Platform. All Rights Reserved.
+
+================================================================================
+IMPORTANT - READ CAREFULLY
+================================================================================
+
+This License Agreement ("Agreement") is a legal agreement between you (either an
+individual or a single entity) and Peso Financial Intelligence Platform ("Licensor")
+for the software product identified above, which includes computer software and may
+include associated media, printed materials, and "online" or electronic documentation
+("Software").
+
+BY VIEWING, ACCESSING, OR USING THE SOFTWARE, YOU AGREE TO BE BOUND BY THE TERMS
+OF THIS AGREEMENT. IF YOU DO NOT AGREE TO THE TERMS OF THIS AGREEMENT, DO NOT
+VIEW, ACCESS, OR USE THE SOFTWARE.
+
+================================================================================
+1. GRANT OF LICENSE
+================================================================================
+
+Subject to the terms and conditions of this Agreement, Licensor grants you a
+limited, non-exclusive, non-transferable, revocable license to:
+
+   a) VIEW the source code for educational and reference purposes only
+   b) STUDY the architecture and implementation for personal learning only
+
+This license does NOT grant you any rights to use, copy, modify, merge, publish,
+distribute, sublicense, or sell copies of the Software.
+
+================================================================================
+2. RESTRICTIONS
+================================================================================
+
+You may NOT:
+
+   a) Modify, adapt, translate, or create derivative works based on the Software
+   b) Reverse engineer, decompile, disassemble, or otherwise attempt to discover
+      the source code or underlying algorithms of the Software
+   c) Remove, alter, or obscure any proprietary notices on the Software
+   d) Rent, lease, lend, sell, redistribute, or sublicense the Software
+   e) Use the Software for any commercial purpose whatsoever
+   f) Copy or reproduce the Software in any manner
+   g) Transfer, assign, or convey your rights under this Agreement
+   h) Create any fork, clone, or derivative repository of the Software
+   i) Submit pull requests, contributions, or modifications
+   j) Use any part of the Software in your own projects or applications
+   k) Distribute the Software via any medium, including but not limited to
+      electronic transmission, physical media, or cloud storage
+
+================================================================================
+3. INTELLECTUAL PROPERTY RIGHTS
+================================================================================
+
+The Software is protected by copyright laws and international copyright treaties,
+as well as other intellectual property laws and treaties. The Software is licensed,
+not sold. All title and intellectual property rights in and to the Software
+(including but not limited to any images, photographs, animations, video, audio,
+music, text, and "applets" incorporated into the Software) are owned by Licensor.
+
+This Software is protected under:
+   - The Copyright Act, 1957 (India)
+   - The Information Technology Act, 2000 (India)
+   - The Patents Act, 1970 (India) - Patents pending
+   - The Trade Marks Act, 1999 (India)
+   - Berne Convention for the Protection of Literary and Artistic Works
+   - TRIPS Agreement (Trade-Related Aspects of Intellectual Property Rights)
+   - International copyright treaties and conventions
+   - Trade secret laws under common law principles
+
+================================================================================
+4. NO CONTRIBUTIONS
+================================================================================
+
+Licensor does NOT accept any contributions, pull requests, bug reports, feature
+requests, or any other form of contribution from external parties. Any unsolicited
+contributions will be:
+
+   a) Immediately rejected without review
+   b) Considered void and without legal effect
+   c) May be treated as an attempt to claim ownership of intellectual property
+
+By submitting any contribution, you acknowledge that you have no rights to such
+contribution and that Licensor has no obligation to you whatsoever.
+
+================================================================================
+5. TERMINATION
+================================================================================
+
+This Agreement is effective until terminated. Your rights under this Agreement
+will terminate automatically without notice from Licensor if you fail to comply
+with any term(s) of this Agreement. Upon termination, you must immediately:
+
+   a) Cease all use of the Software
+   b) Destroy all copies of the Software in your possession
+   c) Certify in writing to Licensor that you have complied with these requirements
+
+================================================================================
+6. ENFORCEMENT AND LEGAL CONSEQUENCES
+================================================================================
+
+VIOLATION OF THIS AGREEMENT WILL RESULT IN IMMEDIATE LEGAL ACTION.
+
+Unauthorized use, reproduction, modification, or distribution of this Software
+will be prosecuted to the fullest extent of the law, including but not limited to:
+
+   a) CIVIL LITIGATION
+      - Injunctive relief to immediately cease infringing activities
+      - Actual damages suffered by Licensor
+      - Disgorgement of profits derived from infringement
+      - Statutory damages under Section 55 of the Copyright Act, 1957
+      - Additional damages up to ₹2,00,000 (Two Lakhs) under enhanced provisions
+      - Costs of litigation and attorney's fees
+
+   b) CRIMINAL PROSECUTION
+      - Criminal copyright infringement under Section 63 of Copyright Act, 1957
+        (Imprisonment up to 3 years and/or fine up to ₹2,00,000)
+      - Enhanced penalties under Section 63B for repeat offenders
+        (Imprisonment up to 3 years and fine up to ₹3,00,000)
+      - Offenses under Information Technology Act, 2000
+        (Section 43, 66, 66B, 66C, 66D - penalties and imprisonment)
+      - Cheating and fraud under Indian Penal Code, 1860 (Section 420)
+
+   c) ADMINISTRATIVE ACTIONS
+      - Takedown notices under IT Act, 2000
+      - Account suspension/termination on hosting platforms
+      - Reporting to Cyber Crime Cell and local police authorities
+      - Complaints to Ministry of Electronics and Information Technology
+
+   d) INTERNATIONAL ENFORCEMENT
+      - Cross-border legal action through international treaties
+      - Cooperation with international law enforcement agencies
+      - Enforcement through TRIPS Agreement and Berne Convention
+      - Mutual Legal Assistance Treaties (MLATs)
+
+================================================================================
+7. MONITORING AND DETECTION
+================================================================================
+
+Licensor actively monitors for unauthorized use through:
+
+   a) Automated code similarity and plagiarism detection tools
+   b) Regular audits of public repositories and platforms
+   c) Collaboration with GitHub, GitLab, and other hosting services
+   d) Engagement of specialized legal counsel
+   e) Industry partnerships for intellectual property protection
+   f) Digital fingerprinting and watermarking technologies
+
+Any detected violation will trigger immediate legal proceedings.
+
+================================================================================
+8. DISCLAIMER OF WARRANTIES
+================================================================================
+
+THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS
+OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT. LICENSOR DOES NOT WARRANT
+THAT THE SOFTWARE WILL MEET YOUR REQUIREMENTS OR THAT THE OPERATION OF THE SOFTWARE
+WILL BE UNINTERRUPTED OR ERROR-FREE.
+
+================================================================================
+9. LIMITATION OF LIABILITY
+================================================================================
+
+IN NO EVENT SHALL LICENSOR BE LIABLE FOR ANY SPECIAL, INCIDENTAL, INDIRECT, OR
+CONSEQUENTIAL DAMAGES WHATSOEVER (INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS
+OF BUSINESS PROFITS, BUSINESS INTERRUPTION, LOSS OF BUSINESS INFORMATION, OR ANY
+OTHER PECUNIARY LOSS) ARISING OUT OF THE USE OF OR INABILITY TO USE THE SOFTWARE.
+
+================================================================================
+10. GOVERNING LAW AND JURISDICTION
+================================================================================
+
+This Agreement shall be governed by and construed in accordance with the laws of
+India, without regard to its conflict of law provisions. Any legal action or
+proceeding arising under this Agreement will be brought exclusively in the courts
+of competent jurisdiction in India, and the parties hereby consent to personal
+jurisdiction and venue therein.
+
+The parties agree that:
+   a) The courts of India shall have exclusive jurisdiction
+   b) Indian law shall apply to all disputes
+   c) Any arbitration shall be conducted under the Arbitration and Conciliation
+      Act, 1996, with seat of arbitration in India
+   d) Language of proceedings shall be English
+
+================================================================================
+11. ENTIRE AGREEMENT
+================================================================================
+
+This Agreement constitutes the entire agreement between you and Licensor relating
+to the Software and supersedes all prior or contemporaneous understandings regarding
+such subject matter. No amendment to or modification of this Agreement will be
+binding unless in writing and signed by Licensor.
+
+================================================================================
+12. SEVERABILITY
+================================================================================
+
+If any provision of this Agreement is held to be unenforceable, such provision
+shall be reformed only to the extent necessary to make it enforceable, and the
+remaining provisions of this Agreement shall remain in full force and effect.
+
+================================================================================
+13. CONTACT INFORMATION
+================================================================================
+
+For licensing inquiries, legal matters, or authorized use requests:
+
+   Peso Financial Intelligence Platform
+   Legal Department
+   Email: legal@peso-finance.com
+   
+   UNAUTHORIZED CONTACT OR ATTEMPTS TO CIRCUMVENT THESE RESTRICTIONS WILL BE
+   DOCUMENTED AND MAY BE USED AS EVIDENCE IN LEGAL PROCEEDINGS.
+
+================================================================================
+14. ACKNOWLEDGMENT
+================================================================================
+
+BY VIEWING, ACCESSING, OR USING THIS SOFTWARE, YOU ACKNOWLEDGE THAT YOU HAVE READ
+THIS AGREEMENT, UNDERSTAND IT, AND AGREE TO BE BOUND BY ITS TERMS AND CONDITIONS.
+
+YOU FURTHER ACKNOWLEDGE THAT THIS AGREEMENT IS THE COMPLETE AND EXCLUSIVE STATEMENT
+OF THE AGREEMENT BETWEEN YOU AND LICENSOR AND SUPERSEDES ANY PROPOSAL OR PRIOR
+AGREEMENT, ORAL OR WRITTEN, AND ANY OTHER COMMUNICATIONS BETWEEN YOU AND LICENSOR
+RELATING TO THE SUBJECT MATTER OF THIS AGREEMENT.
+
+================================================================================
+
+END OF LICENSE AGREEMENT
+
+Last Updated: December 2, 2025
+Version: 1.0
