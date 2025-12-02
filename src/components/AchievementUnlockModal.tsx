@@ -2,12 +2,22 @@ import React from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity } from 'react-native';
 import { ACHIEVEMENT_DEFINITIONS } from '../types/gamification';
 import { Achievements } from '../types/gamification';
+import { Trophy, Coins, Search, Flame, Zap, Sparkles, PartyPopper } from 'lucide-react-native';
+import { colors } from '../utils/colors';
 
 interface AchievementUnlockModalProps {
     visible: boolean;
     achievementKey: keyof Achievements | null;
     onClose: () => void;
 }
+
+const ACHIEVEMENT_ICONS: Record<keyof Achievements, React.ElementType> = {
+    firstWin: Trophy,
+    stabilityStarter: Coins,
+    leakHunter: Search,
+    consistencyHero: Flame,
+    saverSpark: Zap,
+};
 
 export const AchievementUnlockModal: React.FC<AchievementUnlockModalProps> = ({
     visible,
@@ -19,6 +29,8 @@ export const AchievementUnlockModal: React.FC<AchievementUnlockModalProps> = ({
     const achievement = ACHIEVEMENT_DEFINITIONS.find((a) => a.key === achievementKey);
     if (!achievement) return null;
 
+    const Icon = ACHIEVEMENT_ICONS[achievementKey];
+
     return (
         <Modal
             visible={visible}
@@ -29,15 +41,15 @@ export const AchievementUnlockModal: React.FC<AchievementUnlockModalProps> = ({
             <View style={styles.overlay}>
                 <View style={styles.container}>
                     <View style={styles.sparkles}>
-                        <Text style={styles.sparkle}>✨</Text>
-                        <Text style={styles.sparkle}>✨</Text>
-                        <Text style={styles.sparkle}>✨</Text>
+                        <Sparkles size={32} color={colors.buttonGreen} />
+                        <Sparkles size={40} color={colors.growth} />
+                        <Sparkles size={32} color={colors.buttonGreen} />
                     </View>
 
                     <Text style={styles.title}>Achievement Unlocked!</Text>
 
                     <View style={styles.achievementCard}>
-                        <Text style={styles.icon}>{achievement.unlockedIcon}</Text>
+                        <Icon size={64} color={colors.buttonGreen} weight="fill" />
                         <Text style={styles.achievementTitle}>{achievement.title}</Text>
                         <Text style={styles.achievementDescription}>
                             {achievement.description}
@@ -49,7 +61,10 @@ export const AchievementUnlockModal: React.FC<AchievementUnlockModalProps> = ({
                         onPress={onClose}
                         activeOpacity={0.8}
                     >
-                        <Text style={styles.buttonText}>Awesome! 🎉</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                            <Text style={styles.buttonText}>Awesome!</Text>
+                            <PartyPopper size={20} color={colors.white} />
+                        </View>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -77,9 +92,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         gap: 20,
         marginBottom: 20,
-    },
-    sparkle: {
-        fontSize: 32,
+        alignItems: 'center',
     },
     title: {
         fontSize: 26,
@@ -98,16 +111,13 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderColor: '#32D483',
     },
-    icon: {
-        fontSize: 64,
-        marginBottom: 16,
-    },
     achievementTitle: {
         fontSize: 20,
         fontWeight: '700',
         color: '#1A1A1A',
         marginBottom: 8,
         textAlign: 'center',
+        marginTop: 16,
     },
     achievementDescription: {
         fontSize: 14,
@@ -129,3 +139,4 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
 });
+

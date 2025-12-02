@@ -10,16 +10,22 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Edit2, X, Check, Trophy, Gift } from 'lucide-react-native';
+import { Edit2, X, Check, Trophy, Gift, Zap, ClipboardList, AlertTriangle, PartyPopper, ShieldAlert } from 'lucide-react-native';
 import { colors } from '../../utils/colors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useGamification } from '../../contexts/GamificationContext';
 import { StreakBadge } from '../../components/StreakBadge';
 import { MicroWinCard } from '../../components/MicroWinCard';
 import { Mascot } from '../../components/Mascot';
+import { BjorkMascot } from '../../components/BjorkMascot';
+import { BjorkBadge } from '../../components/BjorkBadge';
+import { useBjork } from '../../contexts/BjorkContext';
 import { AchievementUnlockModal } from '../../components/AchievementUnlockModal';
 import { UnexpectedEventButton } from '../../components/UnexpectedEventButton';
 import { Achievements } from '../../types/gamification';
+import { useRiskEngine } from '../../hooks/useRiskEngine';
+import { RiskInputData } from '../../types/riskEngine';
+import { calculateStabilityScore as calculateScoreFromFeatures } from '../../utils/riskUtils';
 
 interface FixedExpense {
   name: string;
@@ -30,6 +36,13 @@ interface FixedExpense {
 interface ProfileData {
   monthlySalary: number;
   fixedExpenses: FixedExpense[];
+  // New fields for Risk Engine
+  employmentType?: string;
+  variableExpenses?: number | null;
+  emiCount?: number;
+  investedValue?: number;
+  creditScore?: number;
+  dependentsCount?: number;
 }
 
 // Indian number formatting
@@ -63,11 +76,37 @@ export const HomeScreen = ({ navigation }: any) => {
   const [showAchievementModal, setShowAchievementModal] = useState(false);
   const [unlockedAchievement, setUnlockedAchievement] = useState<keyof Achievements | null>(null);
 
+  // Risk Engine
+  const { predictRisk, riskResult, engineeredFeatures, loading: riskLoading } = useRiskEngine();
+
+  // BJÖRK State
+  const { bjorkState, triggerPositiveAction, triggerNegativeAction, updateBjorkState, toggleEmotion } = useBjork();
+
   // Load profile data
   useEffect(() => {
     loadProfileData();
     checkRecoveryPlanStatus();
   }, []);
+
+  // Trigger Risk Prediction when profile data changes
+  useEffect(() => {
+    if (profileData) {
+      const totalFixed = fixedExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+      
+      const riskInput: RiskInputData = {
+        employment_type: profileData.employmentType || 'Salaried',
+        monthly_salary: currentSalary,
+        fixed_expenses: totalFixed,
+        variable_expenses: profileData.variableExpenses || null, // Let engine handle null
+        emi_count: profileData.emiCount || 0,
+        invested_value: profileData.investedValue || 0,
+        credit_score: profileData.creditScore || 750,
+        dependents_count: profileData.dependentsCount || 0,
+      };
+
+      predictRisk(riskInput);
+    }
+  }, [profileData, currentSalary, fixedExpenses, predictRisk]);
 
   const loadProfileData = async () => {
     try {
@@ -83,6 +122,24 @@ export const HomeScreen = ({ navigation }: any) => {
           completed: false,
         }));
         setFixedExpenses(expenses);
+      } else {
+        // Default data if none exists (for testing)
+        const defaultData: ProfileData = {
+          monthlySalary: 50000,
+          fixedExpenses: [
+            { name: 'Rent', amount: 15000 },
+            { name: 'Groceries', amount: 5000 },
+          ],
+          employmentType: 'Salaried',
+          variableExpenses: null,
+          emiCount: 1,
+          investedValue: 20000,
+          creditScore: 750,
+          dependentsCount: 1,
+        };
+        setProfileData(defaultData);
+        setCurrentSalary(defaultData.monthlySalary);
+        setFixedExpenses(defaultData.fixedExpenses);
       }
     } catch (error) {
       console.error('Failed to load profile data:', error);
@@ -136,6 +193,9 @@ export const HomeScreen = ({ navigation }: any) => {
     if (updated[index].completed) {
       await updateStreakOnAction();
 
+      // Trigger BJÖRK positive action
+      triggerPositiveAction();
+
       // Check for first win achievement
       if (!gamificationProfile.achievements.firstWin) {
         await unlockAchievement('firstWin');
@@ -178,6 +238,9 @@ export const HomeScreen = ({ navigation }: any) => {
     // Use gamification context to add micro-saving
     await addMicroSaving(suggestedSaving);
 
+    // Trigger BJÖRK positive action for saving
+    triggerPositiveAction("Tiny win today!");
+
     // Hide the card and show success modal
     setShowMicroSavingCard(false);
     setShowSuccessModal(true);
@@ -193,6 +256,32 @@ export const HomeScreen = ({ navigation }: any) => {
   const calculateStabilityScore = (): { score: number; status: string; color: string; badgeBg: string } => {
     if (!profileData) return { score: 0, status: 'No Data', color: '#9A9A9A', badgeBg: '#F4F4F4' };
 
+    // Use engineered features if available, otherwise fallback to simple calculation
+    if (engineeredFeatures) {
+      const score = calculateScoreFromFeatures(engineeredFeatures, currentSalary);
+
+      let status = 'At Risk';
+      let color = '#D9534F';
+      let badgeBg = '#FFEAEA';
+
+      if (score >= 80) {
+        status = 'Excellent';
+        color = '#32D483';
+        badgeBg = '#E8F8F0';
+      } else if (score >= 60) {
+        status = 'Good';
+        color = '#32D483';
+        badgeBg = '#E8F8F0';
+      } else if (score >= 40) {
+        status = 'Fair';
+        color = '#FFB84D';
+        badgeBg = '#FFF4E5';
+      }
+
+      return { score, status, color, badgeBg };
+    }
+
+    // Fallback logic
     const totalFixedExpenses = fixedExpenses.reduce((sum, exp) => sum + exp.amount, 0);
     const incomeVsExpenseRatio = currentSalary > 0 ? (currentSalary - totalFixedExpenses) / currentSalary : 0;
     const savingsRatio = currentSalary > 0 ? gamificationProfile.monthlyMicroSavingsTotal / currentSalary : 0;
@@ -229,6 +318,32 @@ export const HomeScreen = ({ navigation }: any) => {
 
   const stabilityData = calculateStabilityScore();
 
+  // Monitor financial state and update BJÖRK accordingly
+  useEffect(() => {
+    if (!profileData) return;
+
+    const totalFixed = fixedExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+    const isOverspending = stabilityData.score < 40;
+    const hasHighEMI = (profileData.emiCount || 0) > 2;
+    const incomeDropped = currentSalary < (profileData.monthlySalary || 0);
+
+    // Trigger BJÖRK based on financial state
+    if (hasRecoveryPlan || isOverspending || hasHighEMI || incomeDropped) {
+      updateBjorkState('sad_messages', 'sad');
+    } else if (stabilityData.score >= 60 && gamificationProfile.monthlyMicroSavingsTotal > 0) {
+      updateBjorkState('happy_messages', 'normal');
+    }
+  }, [stabilityData.score, hasRecoveryPlan, profileData, currentSalary, gamificationProfile.monthlyMicroSavingsTotal, fixedExpenses, updateBjorkState]);
+
+  const getRiskColor = (category: string) => {
+    switch (category) {
+      case 'High Risk': return '#EF553B';
+      case 'Moderate Risk': return '#FFA15A';
+      case 'Low Risk': return '#00CC96';
+      default: return '#9A9A9A';
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView
@@ -243,6 +358,7 @@ export const HomeScreen = ({ navigation }: any) => {
             <Text style={styles.headerSubtitle}>Control your income and fixed expenses here.</Text>
           </View>
           <View style={styles.headerRight}>
+            <BjorkBadge emotion={bjorkState.emotion} />
             <TouchableOpacity
               style={styles.iconButton}
               onPress={() => navigation.navigate('Achievements')}
@@ -262,22 +378,6 @@ export const HomeScreen = ({ navigation }: any) => {
 
         {/* Streak Badge */}
         <StreakBadge />
-
-        {/* Editable Income Card */}
-        <View style={styles.incomeCard}>
-          <View style={styles.incomeHeader}>
-            <Text style={styles.incomeLabel}>Monthly Income</Text>
-            <TouchableOpacity
-              style={styles.editButton}
-              onPress={handleEditSalary}
-              activeOpacity={0.7}
-            >
-              <Edit2 size={16} color={colors.buttonGreen} strokeWidth={2.5} />
-              <Text style={styles.editButtonText}>Edit</Text>
-            </TouchableOpacity>
-          </View>
-          <Text style={styles.incomeAmount}>₹ {formatIndianNumber(currentSalary)}</Text>
-        </View>
 
         {/* Stability Score Card */}
         <View style={styles.stabilityCard}>
@@ -311,6 +411,24 @@ export const HomeScreen = ({ navigation }: any) => {
             Based on your income, expenses, and savings ratio
           </Text>
         </View>
+
+        {/* Editable Income Card */}
+        <View style={styles.incomeCard}>
+          <View style={styles.incomeHeader}>
+            <Text style={styles.incomeLabel}>Monthly Income</Text>
+            <TouchableOpacity
+              style={styles.editButton}
+              onPress={handleEditSalary}
+              activeOpacity={0.7}
+            >
+              <Edit2 size={16} color={colors.buttonGreen} strokeWidth={2.5} />
+              <Text style={styles.editButtonText}>Edit</Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.incomeAmount}>₹ {formatIndianNumber(currentSalary)}</Text>
+        </View>
+
+
 
         {/* Fixed Expenses Checklist */}
         <View style={styles.expensesCard}>
@@ -356,7 +474,7 @@ export const HomeScreen = ({ navigation }: any) => {
         {/* Micro-Savings Indicator */}
         {gamificationProfile.monthlyMicroSavingsTotal > 0 && (
           <View style={styles.microSavingsIndicator}>
-            <Text style={styles.microSavingsIcon}>⚡</Text>
+            <Zap size={20} color={colors.buttonGreen} />
             <Text style={styles.microSavingsText}>
               Micro-savings this month: <Text style={styles.microSavingsAmount}>₹{gamificationProfile.monthlyMicroSavingsTotal.toLocaleString('en-IN')}</Text>
             </Text>
@@ -372,15 +490,22 @@ export const HomeScreen = ({ navigation }: any) => {
           />
         )}
 
-        {/* Mascot */}
-        <View style={styles.mascotContainer}>
-          <Mascot size="medium" />
+        {/* BJÖRK Mascot - Dynamic State-Driven */}
+        <View style={styles.bjorkContainer}>
+          <BjorkMascot
+            emotion={bjorkState.emotion}
+            message={bjorkState.message}
+            size="medium"
+            showMessage={true}
+            animate={true}
+            onPress={toggleEmotion}
+          />
         </View>
 
         {/* Recovery Plan Banner */}
         {hasRecoveryPlan && (
           <View style={styles.recoveryBanner}>
-            <Text style={styles.recoveryBannerIcon}>📋</Text>
+            <ClipboardList size={24} color={colors.buttonGreen} style={{ marginRight: 12 }} />
             <View style={styles.recoveryBannerTextContainer}>
               <Text style={styles.recoveryBannerTitle}>Recovery Plan Active</Text>
               <Text style={styles.recoveryBannerText}>
@@ -402,7 +527,7 @@ export const HomeScreen = ({ navigation }: any) => {
           activeOpacity={0.85}
         >
           <View style={styles.emergencyIconContainer}>
-            <Text style={styles.emergencyIcon}>🚨</Text>
+            <AlertTriangle size={26} color="#A30000" />
           </View>
           <View style={styles.emergencyTextContainer}>
             <Text style={styles.emergencyTitle}>Emergency Mode (Job Loss Mode)</Text>
@@ -560,7 +685,10 @@ export const HomeScreen = ({ navigation }: any) => {
       >
         <View style={styles.successModalOverlay}>
           <View style={styles.successModalContent}>
-            <Text style={styles.successModalTitle}>🎉 You saved ₹{suggestedSaving}!</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12, gap: 8 }}>
+              <PartyPopper size={28} color={colors.buttonGreen} />
+              <Text style={[styles.successModalTitle, { marginBottom: 0 }]}>You saved ₹{suggestedSaving}!</Text>
+            </View>
             <Text style={styles.successModalSubtitle}>
               These tiny moves build your safety net.
             </Text>
@@ -636,6 +764,69 @@ const styles = StyleSheet.create({
     backgroundColor: '#F4F4F4',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+
+  // Risk Card
+  riskCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 24,
+    marginHorizontal: 16,
+    marginBottom: 24,
+    borderWidth: 2,
+    shadowColor: 'rgba(0, 0, 0, 0.08)',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 1,
+    shadowRadius: 16,
+    elevation: 4,
+  },
+  riskHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  riskTitle: {
+    fontSize: 19,
+    fontWeight: '700',
+    color: '#1A1A1A',
+  },
+  riskBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  riskBadgeText: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  riskMetrics: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  riskMetricItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  riskMetricLabel: {
+    fontSize: 12,
+    color: '#6B6B6B',
+    marginBottom: 4,
+    fontWeight: '600',
+  },
+  riskMetricValue: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1A1A1A',
+  },
+  riskDivider: {
+    width: 1,
+    height: 30,
+    backgroundColor: '#E8E8E8',
   },
 
   // Income Card
@@ -1176,6 +1367,13 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#6B6B6B',
     lineHeight: 18,
+  },
+
+  // BJÖRK Mascot Container
+  bjorkContainer: {
+    marginHorizontal: 16,
+    marginBottom: 24,
+    alignItems: 'center',
   },
 
   bottomPadding: {

@@ -2,17 +2,27 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useGamification } from '../contexts/GamificationContext';
 import { MascotMood } from '../types/gamification';
+import { Smile, Star, Frown, AlertCircle, Shield } from 'lucide-react-native';
+import { colors } from '../utils/colors';
 
 interface MascotProps {
     size?: 'small' | 'medium' | 'large';
 }
 
-const MASCOT_EMOJIS: Record<MascotMood, string> = {
-    happy: '😊',
-    excited: '🤩',
-    sad: '😢',
-    worried: '😰',
-    protective: '🛡️',
+const MASCOT_ICONS: Record<MascotMood, React.ElementType> = {
+    happy: Smile,
+    excited: Star,
+    sad: Frown,
+    worried: AlertCircle,
+    protective: Shield,
+};
+
+const MOOD_COLORS: Record<MascotMood, string> = {
+    happy: colors.buttonGreen,
+    excited: colors.growth,
+    sad: colors.textLight,
+    worried: colors.crisis,
+    protective: '#4A90E2',
 };
 
 export const Mascot: React.FC<MascotProps> = ({ size = 'medium' }) => {
@@ -22,28 +32,30 @@ export const Mascot: React.FC<MascotProps> = ({ size = 'medium' }) => {
     const sizeStyles = {
         small: {
             container: styles.containerSmall,
-            emoji: styles.emojiSmall,
+            iconSize: 32,
             message: styles.messageSmall,
         },
         medium: {
             container: styles.containerMedium,
-            emoji: styles.emojiMedium,
+            iconSize: 48,
             message: styles.messageMedium,
         },
         large: {
             container: styles.containerLarge,
-            emoji: styles.emojiLarge,
+            iconSize: 64,
             message: styles.messageLarge,
         },
     };
 
     const currentSize = sizeStyles[size];
+    const Icon = MASCOT_ICONS[mascotState.mood];
+    const iconColor = MOOD_COLORS[mascotState.mood];
 
     return (
         <View style={[styles.container, currentSize.container]}>
-            <Text style={[styles.emoji, currentSize.emoji]}>
-                {MASCOT_EMOJIS[mascotState.mood]}
-            </Text>
+            <View style={styles.iconContainer}>
+                <Icon size={currentSize.iconSize} color={iconColor} weight="fill" />
+            </View>
             <Text style={[styles.message, currentSize.message]}>
                 {mascotState.message}
             </Text>
@@ -78,20 +90,8 @@ const styles = StyleSheet.create({
         padding: 28,
         borderRadius: 24,
     },
-    emoji: {
+    iconContainer: {
         marginBottom: 12,
-    },
-    emojiSmall: {
-        fontSize: 32,
-        marginBottom: 8,
-    },
-    emojiMedium: {
-        fontSize: 48,
-        marginBottom: 12,
-    },
-    emojiLarge: {
-        fontSize: 64,
-        marginBottom: 16,
     },
     message: {
         textAlign: 'center',
@@ -111,3 +111,4 @@ const styles = StyleSheet.create({
         lineHeight: 22,
     },
 });
+

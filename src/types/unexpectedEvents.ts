@@ -21,6 +21,7 @@ export interface UnexpectedEvent {
 export interface RecoveryPlan {
     todayActions: string[];
     weekActions: string[];
+    survivalPlan: string[]; // New 30-day plan
     recoverySteps: string[];
     stabilityReturnDays: number;
     updatedRunway: number;

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
-import { X } from 'lucide-react-native';
+import { X, Flame, TrendingUp } from 'lucide-react-native';
 import { useGamification } from '../contexts/GamificationContext';
+import { colors } from '../utils/colors';
 
 export const StreakBadge = () => {
     const { profile } = useGamification();
@@ -15,7 +16,7 @@ export const StreakBadge = () => {
                 activeOpacity={0.8}
             >
                 <View style={styles.content}>
-                    <Text style={styles.fireIcon}>🔥</Text>
+                    <Flame size={32} color={colors.growth} fill={colors.growth} />
                     <View style={styles.textContainer}>
                         <Text style={styles.label}>Stability Streak</Text>
                         <Text style={styles.streakCount}>{profile.streakCount} Days</Text>
@@ -38,7 +39,10 @@ export const StreakBadge = () => {
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalContent}>
                         <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>🔥 Your Streak</Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                                <Flame size={28} color={colors.growth} fill={colors.growth} />
+                                <Text style={styles.modalTitle}>Your Streak</Text>
+                            </View>
                             <TouchableOpacity
                                 onPress={() => setShowModal(false)}
                                 style={styles.closeButton}
@@ -60,7 +64,10 @@ export const StreakBadge = () => {
                         </View>
 
                         <View style={styles.streakInfo}>
-                            <Text style={styles.infoTitle}>Keep it going! 💪</Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                                <TrendingUp size={20} color={colors.textDark} />
+                                <Text style={[styles.infoTitle, { marginBottom: 0 }]}>Keep it going!</Text>
+                            </View>
                             <Text style={styles.infoText}>
                                 Complete any positive action daily to maintain your streak:
                             </Text>
@@ -109,9 +116,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 14,
-    },
-    fireIcon: {
-        fontSize: 32,
     },
     textContainer: {
         flex: 1,
@@ -232,3 +236,4 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
 });
+

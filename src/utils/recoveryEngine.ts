@@ -140,9 +140,31 @@ export const generateRecoveryPlan = (
         recoverySteps.push('Skip 1 non-essential payment this cycle');
     }
 
+    // Generate 30-Day Survival Plan
+    const survivalPlan: string[] = [
+        'Week 1: Cut all non-essential spending (eating out, entertainment)',
+        'Week 2: Negotiate or defer one large bill payment',
+        'Week 3: Look for short-term income sources (selling items, gigs)',
+        'Week 4: Re-evaluate budget and start rebuilding emergency fund',
+    ];
+
+    if (shockSeverity >= 40) {
+        survivalPlan[0] = 'Week 1: STRICT FREEZE on all spending except food/rent';
+        survivalPlan[1] = 'Week 2: Contact lenders for EMI restructuring';
+    }
+
+    // Specific advice for very high shock (likely job loss)
+    if (shockSeverity >= 80) {
+        survivalPlan[0] = 'Week 1: File for unemployment / insurance immediately';
+        survivalPlan[1] = 'Week 2: Update resume and contact 5 recruiters/day';
+        survivalPlan[2] = 'Week 3: Apply for gig work to cover basic food costs';
+        survivalPlan[3] = 'Week 4: Review assets to liquidate if needed';
+    }
+
     return {
         todayActions,
         weekActions,
+        survivalPlan,
         recoverySteps,
         stabilityReturnDays,
         updatedRunway,

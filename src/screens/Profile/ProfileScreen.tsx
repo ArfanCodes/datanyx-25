@@ -1,20 +1,12 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Switch,
-  TextInput,
-  Alert,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, TextInput, Modal } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAuthStore } from '../../store/authStore';
 import { Card } from '../../components/Card';
-import { Button } from '../../components/Button';
 import { Chip } from '../../components/Chip';
 import { colors } from '../../utils/colors';
 import { spacing } from '../../theme/spacing';
-import { useAuthStore } from '../../store/authStore';
+import { LogOut } from 'lucide-react-native';
 
 type AIMode = 'Crisis' | 'Normal' | 'Growth';
 type LifeStage = 'Student' | 'Early Career' | 'Mid Career' | 'Family' | 'Other';
@@ -27,11 +19,8 @@ interface ConnectionStatus {
 }
 
 export const ProfileScreen = () => {
-  const { logout } = useAuthStore();
+  const { user, logout } = useAuthStore();
   
-  // User data state
-  const [userName] = useState('Arfan Khan');
-  const [userEmail] = useState('arfan@example.com');
   const [aiMode, setAiMode] = useState<AIMode>('Normal');
 
   // Profile data
@@ -58,6 +47,9 @@ export const ProfileScreen = () => {
   // Privacy settings
   const [allowAnonymousData, setAllowAnonymousData] = useState(true);
 
+  // Modal state
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -75,314 +67,267 @@ export const ProfileScreen = () => {
     }
   };
 
-  const handleLogout = async () => {
-    Alert.alert(
-      'Log Out',
-      'Are you sure you want to log out?',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Log Out',
-          style: 'destructive',
-          onPress: async () => {
-            await logout();
-            // Navigation will be handled automatically by AppNavigator
-          },
-        },
-      ]
-    );
+  const handleLogout = () => {
+    setShowLogoutModal(true);
+  };
+
+  const confirmLogout = async () => {
+    setShowLogoutModal(false);
+    setTimeout(async () => {
+      await logout();
+    }, 300);
   };
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* User Header Card */}
-      <Card style={styles.headerCard}>
-        <View style={styles.avatarContainer}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{getInitials(userName)}</Text>
-          </View>
-        </View>
-        <Text style={styles.userName}>{userName}</Text>
-        <Text style={styles.userEmail}>{userEmail}</Text>
-        <View style={styles.modeChipContainer}>
-          <Chip
-            label={`Mode: ${aiMode}`}
-            backgroundColor={getModeColor(aiMode)}
-          />
-        </View>
-      </Card>
-
-      {/* About You Card */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>About You</Text>
-        <Card>
-          {/* Life Stage */}
-          <View style={styles.inputRow}>
-            <Text style={styles.inputLabel}>Life Stage</Text>
-            <View style={styles.inputRight}>
-              <Text style={styles.inputValue}>{lifeStage}</Text>
-              <Text style={styles.chevron}>›</Text>
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        {/* User Header Card */}
+        <Card style={styles.headerCard}>
+          <View style={styles.avatarContainer}>
+            <View style={styles.avatar}>
+              <Text style={styles.avatarText}>{getInitials(user?.name || 'User')}</Text>
             </View>
           </View>
-
-          <View style={styles.divider} />
-
-          {/* Job Type */}
-          <View style={styles.inputRow}>
-            <Text style={styles.inputLabel}>Job Type</Text>
-            <View style={styles.inputRight}>
-              <Text style={styles.inputValue}>{jobType}</Text>
-              <Text style={styles.chevron}>›</Text>
-            </View>
-          </View>
-
-          <View style={styles.divider} />
-
-          {/* Dependents */}
-          <View style={styles.inputRow}>
-            <Text style={styles.inputLabel}>Dependents</Text>
-            <View style={styles.stepperContainer}>
-              <TouchableOpacity
-                style={styles.stepperButton}
-                onPress={() => setDependents(Math.max(0, dependents - 1))}
-              >
-                <Text style={styles.stepperButtonText}>−</Text>
-              </TouchableOpacity>
-              <Text style={styles.stepperValue}>{dependents}</Text>
-              <TouchableOpacity
-                style={styles.stepperButton}
-                onPress={() => setDependents(dependents + 1)}
-              >
-                <Text style={styles.stepperButtonText}>+</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <View style={styles.divider} />
-
-          {/* Monthly Income */}
-          <View style={styles.inputRow}>
-            <Text style={styles.inputLabel}>Monthly Income</Text>
-            <TextInput
-              style={styles.textInput}
-              value={monthlyIncome}
-              onChangeText={setMonthlyIncome}
-              keyboardType="numeric"
-              placeholder="50000"
-            />
-          </View>
-
-          <View style={styles.divider} />
-
-          {/* Salary Credit Date */}
-          <View style={styles.inputRow}>
-            <Text style={styles.inputLabel}>Salary Credit Date</Text>
-            <TextInput
-              style={styles.textInput}
-              value={salaryCreditDate}
-              onChangeText={setSalaryCreditDate}
-              keyboardType="numeric"
-              placeholder="1"
+          <Text style={styles.userName}>{user?.name || 'User Name'}</Text>
+          <Text style={styles.userEmail}>{user?.email || 'user@email.com'}</Text>
+          <View style={styles.modeChipContainer}>
+            <Chip
+              label={`Mode: ${aiMode}`}
+              backgroundColor={getModeColor(aiMode)}
             />
           </View>
         </Card>
-      </View>
 
-      {/* Connected Accounts & Data */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Connected Accounts & Data</Text>
-        <Card>
-          {connections.map((connection, index) => (
-            <View key={connection.name}>
-              {index > 0 && <View style={styles.divider} />}
-              <View style={styles.connectionRow}>
-                <View style={styles.connectionLeft}>
-                  <Text style={styles.connectionIcon}>{connection.icon}</Text>
-                  <Text style={styles.connectionName}>{connection.name}</Text>
-                </View>
-                <View style={styles.connectionRight}>
-                  <View style={[
-                    styles.statusPill,
-                    connection.connected ? styles.statusConnected : styles.statusNotConnected
-                  ]}>
-                    <Text style={[
-                      styles.statusText,
-                      connection.connected ? styles.statusTextConnected : styles.statusTextNotConnected
-                    ]}>
-                      {connection.connected ? 'Connected' : 'Not connected'}
-                    </Text>
-                  </View>
-                  <Text style={styles.chevron}>›</Text>
-                </View>
+        {/* About You Card */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>About You</Text>
+          <Card>
+            <View style={styles.inputRow}>
+              <Text style={styles.inputLabel}>Life Stage</Text>
+              <View style={styles.inputRight}>
+                <Text style={styles.inputValue}>{lifeStage}</Text>
+                <Text style={styles.chevron}>›</Text>
               </View>
             </View>
-          ))}
+            <View style={styles.divider} />
+            
+            <View style={styles.inputRow}>
+              <Text style={styles.inputLabel}>Job Type</Text>
+              <View style={styles.inputRight}>
+                <Text style={styles.inputValue}>{jobType}</Text>
+                <Text style={styles.chevron}>›</Text>
+              </View>
+            </View>
+            <View style={styles.divider} />
 
+            <View style={styles.inputRow}>
+              <Text style={styles.inputLabel}>Dependents</Text>
+              <View style={styles.stepperContainer}>
+                <TouchableOpacity 
+                  style={styles.stepperButton}
+                  onPress={() => setDependents(Math.max(0, dependents - 1))}
+                >
+                  <Text style={styles.stepperButtonText}>-</Text>
+                </TouchableOpacity>
+                <Text style={styles.stepperValue}>{dependents}</Text>
+                <TouchableOpacity 
+                  style={styles.stepperButton}
+                  onPress={() => setDependents(dependents + 1)}
+                >
+                  <Text style={styles.stepperButtonText}>+</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+            <View style={styles.divider} />
+
+            <View style={styles.inputRow}>
+              <Text style={styles.inputLabel}>Monthly Income</Text>
+              <TextInput
+                style={styles.textInput}
+                value={`₹ ${monthlyIncome}`}
+                onChangeText={(text) => setMonthlyIncome(text.replace(/[^0-9]/g, ''))}
+                keyboardType="numeric"
+              />
+            </View>
+            <View style={styles.divider} />
+
+            <View style={styles.inputRow}>
+              <Text style={styles.inputLabel}>Salary Credit Date</Text>
+              <TextInput
+                style={styles.textInput}
+                value={salaryCreditDate}
+                onChangeText={setSalaryCreditDate}
+                keyboardType="numeric"
+                maxLength={2}
+              />
+            </View>
+          </Card>
+        </View>
+
+        {/* Connections */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Connections</Text>
+          <Card>
+            {connections.map((item, index) => (
+              <React.Fragment key={item.name}>
+                <View style={styles.connectionRow}>
+                  <View style={styles.connectionLeft}>
+                    <Text style={styles.connectionIcon}>{item.icon}</Text>
+                    <Text style={styles.connectionName}>{item.name}</Text>
+                  </View>
+                  <View style={styles.connectionRight}>
+                    <View style={[
+                      styles.statusPill,
+                      item.connected ? styles.statusConnected : styles.statusNotConnected
+                    ]}>
+                      <Text style={[
+                        styles.statusText,
+                        item.connected ? styles.statusTextConnected : styles.statusTextNotConnected
+                      ]}>
+                        {item.connected ? 'Connected' : 'Connect'}
+                      </Text>
+                    </View>
+                    <Text style={styles.chevron}>›</Text>
+                  </View>
+                </View>
+                {index < connections.length - 1 && <View style={styles.divider} />}
+              </React.Fragment>
+            ))}
+          </Card>
           <Text style={styles.infoText}>
-            We only read transaction messages and approved connections to understand your money patterns.
+            We use Account Aggregator (AA) for secure, read-only access.
           </Text>
-        </Card>
-      </View>
+        </View>
 
-      {/* Notifications & Coach */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Notifications & Coach</Text>
-        <Card>
-          <View style={styles.toggleRow}>
-            <Text style={styles.toggleLabel}>Alerts about debt & EMIs</Text>
-            <Switch
-              value={notifDebtEMI}
-              onValueChange={setNotifDebtEMI}
-              trackColor={{ false: '#D0D0D0', true: colors.buttonGreen }}
-              thumbColor={colors.white}
-            />
-          </View>
+        {/* AI Mode Settings */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>AI Mode Settings</Text>
+          <Card>
+            <View style={styles.toggleRow}>
+              <Text style={styles.toggleLabel}>Current Mode</Text>
+              <View style={styles.modeSelector}>
+                <TouchableOpacity 
+                  style={styles.modePill}
+                  onPress={() => setAiMode(aiMode === 'Normal' ? 'Crisis' : aiMode === 'Crisis' ? 'Growth' : 'Normal')}
+                >
+                  <Text style={[styles.modePillText, styles.modePillTextActive]}>{aiMode}</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+            <Text style={styles.modeHintText}>
+              Tap to cycle modes. "Crisis" locks non-essentials. "Growth" pushes investments.
+            </Text>
+          </Card>
+        </View>
 
-          <View style={styles.divider} />
+        {/* Notifications */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Notifications</Text>
+          <Card>
+            <View style={styles.toggleRow}>
+              <Text style={styles.toggleLabel}>Debt & EMI Alerts</Text>
+              <Switch
+                value={notifDebtEMI}
+                onValueChange={setNotifDebtEMI}
+                trackColor={{ false: '#767577', true: colors.buttonGreen }}
+              />
+            </View>
+            <View style={styles.divider} />
+            <View style={styles.toggleRow}>
+              <Text style={styles.toggleLabel}>Overspending Nudges</Text>
+              <Switch
+                value={notifOverspending}
+                onValueChange={setNotifOverspending}
+                trackColor={{ false: '#767577', true: colors.buttonGreen }}
+              />
+            </View>
+            <View style={styles.divider} />
+            <View style={styles.toggleRow}>
+              <Text style={styles.toggleLabel}>Daily Coach Tips</Text>
+              <Switch
+                value={notifDailyTips}
+                onValueChange={setNotifDailyTips}
+                trackColor={{ false: '#767577', true: colors.buttonGreen }}
+              />
+            </View>
+          </Card>
+        </View>
 
-          <View style={styles.toggleRow}>
-            <Text style={styles.toggleLabel}>Alerts about overspending / leaks</Text>
-            <Switch
-              value={notifOverspending}
-              onValueChange={setNotifOverspending}
-              trackColor={{ false: '#D0D0D0', true: colors.buttonGreen }}
-              thumbColor={colors.white}
-            />
-          </View>
-
-          <View style={styles.divider} />
-
-          <View style={styles.toggleRow}>
-            <Text style={styles.toggleLabel}>Daily tips from Coach</Text>
-            <Switch
-              value={notifDailyTips}
-              onValueChange={setNotifDailyTips}
-              trackColor={{ false: '#D0D0D0', true: colors.buttonGreen }}
-              thumbColor={colors.white}
-            />
-          </View>
-
-          <View style={styles.divider} />
-
-          <View style={styles.toggleRow}>
-            <Text style={styles.toggleLabel}>Weekly summary report</Text>
-            <Switch
-              value={notifWeeklySummary}
-              onValueChange={setNotifWeeklySummary}
-              trackColor={{ false: '#D0D0D0', true: colors.buttonGreen }}
-              thumbColor={colors.white}
-            />
-          </View>
-        </Card>
-      </View>
-
-      {/* AI Mode Preferences */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>How are things right now?</Text>
-        <Card>
-          <View style={styles.modeSelector}>
-            <TouchableOpacity
-              style={[
-                styles.modePill,
-                aiMode === 'Crisis' && { backgroundColor: colors.accentPink }
-              ]}
-              onPress={() => setAiMode('Crisis')}
-            >
-              <Text style={[
-                styles.modePillText,
-                aiMode === 'Crisis' && styles.modePillTextActive
-              ]}>
-                I'm in Crisis
-              </Text>
+        {/* Privacy & Data */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Privacy & Data</Text>
+          <Card>
+            <View style={styles.toggleRow}>
+              <Text style={styles.toggleLabel}>Allow Anonymous Data Usage</Text>
+              <Switch
+                value={allowAnonymousData}
+                onValueChange={setAllowAnonymousData}
+                trackColor={{ false: '#767577', true: colors.buttonGreen }}
+              />
+            </View>
+            <View style={styles.divider} />
+            <TouchableOpacity style={styles.inputRow}>
+              <Text style={styles.privacyLabel}>Export My Data</Text>
+              <Text style={styles.chevron}>›</Text>
             </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.modePill,
-                aiMode === 'Normal' && { backgroundColor: colors.accentBlue }
-              ]}
-              onPress={() => setAiMode('Normal')}
-            >
-              <Text style={[
-                styles.modePillText,
-                aiMode === 'Normal' && styles.modePillTextActive
-              ]}>
-                Things are Normal
-              </Text>
+            <View style={styles.divider} />
+            <TouchableOpacity style={styles.inputRow}>
+              <Text style={styles.dangerLabel}>Delete Account</Text>
+              <Text style={styles.chevron}>›</Text>
             </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.modePill,
-                aiMode === 'Growth' && { backgroundColor: '#D7F7E7' }
-              ]}
-              onPress={() => setAiMode('Growth')}
-            >
-              <Text style={[
-                styles.modePillText,
-                aiMode === 'Growth' && styles.modePillTextActive
-              ]}>
-                I want to Grow
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <Text style={styles.modeHintText}>
-            This helps the app focus on the right advice for you.
-          </Text>
-        </Card>
-      </View>
-
-      {/* Privacy & Data */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Privacy & Data</Text>
-        <Card>
-          <View style={styles.toggleRow}>
-            <Text style={styles.toggleLabel}>Allow anonymised data to improve recommendations</Text>
-            <Switch
-              value={allowAnonymousData}
-              onValueChange={setAllowAnonymousData}
-              trackColor={{ false: '#D0D0D0', true: colors.buttonGreen }}
-              thumbColor={colors.white}
-            />
-          </View>
-
-          <View style={styles.divider} />
-
-          <TouchableOpacity style={styles.privacyRow}>
-            <Text style={styles.privacyLabel}>View what data is stored</Text>
-            <Text style={styles.chevron}>›</Text>
-          </TouchableOpacity>
-
-          <View style={styles.divider} />
-
-          <TouchableOpacity style={styles.privacyRow}>
-            <Text style={styles.dangerLabel}>Clear personal data</Text>
-            <Text style={styles.chevron}>›</Text>
-          </TouchableOpacity>
-
+          </Card>
           <Text style={styles.privacyInfoText}>
-            You're always in control. You can disconnect data sources or clear data anytime.
+            We never sell your personal data. Read our Privacy Policy.
           </Text>
-        </Card>
-      </View>
+        </View>
 
-      {/* Logout Button */}
-      <View style={styles.logoutContainer}>
-        <TouchableOpacity
-          style={styles.logoutButton}
-          onPress={handleLogout}
-        >
-          <Text style={styles.logoutText}>Log Out</Text>
-        </TouchableOpacity>
-      </View>
+        {/* Logout Button */}
+        <View style={styles.logoutContainer}>
+          <TouchableOpacity
+            style={styles.logoutButton}
+            onPress={handleLogout}
+          >
+            <Text style={styles.logoutText}>Log Out</Text>
+          </TouchableOpacity>
+        </View>
 
-      {/* Bottom padding for tab bar */}
-      <View style={styles.bottomPadding} />
-    </ScrollView>
+        <View style={styles.bottomPadding} />
+      </ScrollView>
+
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={showLogoutModal}
+        onRequestClose={() => setShowLogoutModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalIconContainer}>
+              <LogOut size={32} color={colors.crisis} />
+            </View>
+            <Text style={styles.modalTitle}>Log Out</Text>
+            <Text style={styles.modalMessage}>
+              Are you sure you want to log out?{'\n'}
+              You'll need to sign in again to access your data.
+            </Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={styles.modalCancelButton}
+                onPress={() => setShowLogoutModal(false)}
+              >
+                <Text style={styles.modalCancelText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.modalLogoutButton}
+                onPress={confirmLogout}
+              >
+                <Text style={styles.modalLogoutText}>Log Out</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </SafeAreaView>
   );
 };
 
@@ -390,6 +335,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  scrollView: {
+    flex: 1,
   },
   headerCard: {
     marginTop: spacing.xl,
@@ -620,5 +568,77 @@ const styles = StyleSheet.create({
   },
   bottomPadding: {
     height: 100,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: colors.white,
+    borderRadius: 24,
+    padding: spacing.xl,
+    width: '85%',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalIconContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#FFE5E5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: colors.textDark,
+    marginBottom: spacing.sm,
+  },
+  modalMessage: {
+    fontSize: 14,
+    color: colors.textLight,
+    textAlign: 'center',
+    marginBottom: spacing.xl,
+    lineHeight: 20,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    gap: spacing.md,
+    width: '100%',
+  },
+  modalCancelButton: {
+    flex: 1,
+    paddingVertical: spacing.md,
+    borderRadius: 12,
+    backgroundColor: '#F0F0F0',
+    alignItems: 'center',
+  },
+  modalCancelText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.textDark,
+  },
+  modalLogoutButton: {
+    flex: 1,
+    paddingVertical: spacing.md,
+    borderRadius: 12,
+    backgroundColor: colors.crisis,
+    alignItems: 'center',
+  },
+  modalLogoutText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.white,
   },
 });

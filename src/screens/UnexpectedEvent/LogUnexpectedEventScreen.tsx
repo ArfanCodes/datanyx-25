@@ -21,7 +21,6 @@ export const LogUnexpectedEventScreen: React.FC<LogUnexpectedEventScreenProps> =
 }) => {
     const [eventType, setEventType] = useState<UnexpectedEventType>('SALARY_DELAY');
     const [moneyLost, setMoneyLost] = useState('');
-    const [remainingBalance, setRemainingBalance] = useState('');
     const [reason, setReason] = useState('');
     const [isRecurring, setIsRecurring] = useState(false);
     const [showEventTypePicker, setShowEventTypePicker] = useState(false);
@@ -33,10 +32,7 @@ export const LogUnexpectedEventScreen: React.FC<LogUnexpectedEventScreenProps> =
             return;
         }
 
-        if (!remainingBalance || parseInt(remainingBalance) < 0) {
-            Alert.alert('Invalid Input', 'Please enter your remaining balance.');
-            return;
-        }
+
 
         if (!reason.trim()) {
             Alert.alert('Invalid Input', 'Please explain what happened.');
@@ -47,7 +43,7 @@ export const LogUnexpectedEventScreen: React.FC<LogUnexpectedEventScreenProps> =
         navigation.navigate('RecoveryPlan', {
             eventType,
             moneyLost: parseInt(moneyLost),
-            remainingBalance: parseInt(remainingBalance),
+            remainingBalance: 0,
             reason,
             isRecurring,
         });
@@ -135,25 +131,6 @@ export const LogUnexpectedEventScreen: React.FC<LogUnexpectedEventScreenProps> =
                             onChangeText={(value) => {
                                 const cleaned = value.replace(/[^0-9]/g, '');
                                 setMoneyLost(cleaned);
-                            }}
-                            keyboardType="numeric"
-                            placeholder="Enter amount"
-                            placeholderTextColor="#9A9A9A"
-                        />
-                    </View>
-                </View>
-
-                {/* Remaining Balance */}
-                <View style={styles.fieldContainer}>
-                    <Text style={styles.label}>Remaining Balance</Text>
-                    <View style={styles.inputWrapper}>
-                        <Text style={styles.currencyPrefix}>₹</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={remainingBalance}
-                            onChangeText={(value) => {
-                                const cleaned = value.replace(/[^0-9]/g, '');
-                                setRemainingBalance(cleaned);
                             }}
                             keyboardType="numeric"
                             placeholder="Enter amount"

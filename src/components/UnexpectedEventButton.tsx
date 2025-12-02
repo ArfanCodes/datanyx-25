@@ -1,5 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { AlertTriangle } from 'lucide-react-native';
+import { colors } from '../utils/colors';
 
 interface UnexpectedEventButtonProps {
     onPress: () => void;
@@ -15,7 +17,7 @@ export const UnexpectedEventButton: React.FC<UnexpectedEventButtonProps> = ({
             activeOpacity={0.8}
         >
             <View style={styles.iconContainer}>
-                <Text style={styles.icon}>⚠️</Text>
+                <AlertTriangle size={24} color={colors.growth} />
             </View>
             <View style={styles.textContainer}>
                 <Text style={styles.title}>Unexpected Event?</Text>
@@ -54,9 +56,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         marginRight: 16,
     },
-    icon: {
-        fontSize: 24,
-    },
     textContainer: {
         flex: 1,
     },
@@ -73,3 +72,4 @@ const styles = StyleSheet.create({
         lineHeight: 18,
     },
 });
+

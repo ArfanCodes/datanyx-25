@@ -1,5 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Target } from 'lucide-react-native';
+import { colors } from '../utils/colors';
 
 interface MicroWinCardProps {
     suggestedSaving: number;
@@ -15,7 +17,7 @@ export const MicroWinCard: React.FC<MicroWinCardProps> = ({
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.icon}>🎯</Text>
+                <Target size={32} color={colors.buttonGreen} />
                 <View style={styles.textContainer}>
                     <Text style={styles.title}>
                         Nice! You could save ₹{suggestedSaving} from that spend.
@@ -69,9 +71,6 @@ const styles = StyleSheet.create({
         gap: 14,
         marginBottom: 20,
     },
-    icon: {
-        fontSize: 32,
-    },
     textContainer: {
         flex: 1,
     },
@@ -120,3 +119,4 @@ const styles = StyleSheet.create({
         color: '#6B6B6B',
     },
 });
+

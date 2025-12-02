@@ -113,7 +113,7 @@ export const RecoveryPlanScreen: React.FC<RecoveryPlanScreenProps> = ({
         <SafeAreaView style={styles.container} edges={['top']}>
             <View style={styles.header}>
                 <TouchableOpacity
-                    onPress={() => navigation.navigate('Home')}
+                    onPress={() => navigation.navigate('Main')}
                     style={styles.backButton}
                     activeOpacity={0.7}
                 >
@@ -226,6 +226,19 @@ export const RecoveryPlanScreen: React.FC<RecoveryPlanScreenProps> = ({
                     </View>
                 </View>
 
+                {/* 30-Day Survival Plan */}
+                <View style={styles.sectionCard}>
+                    <Text style={styles.sectionTitle}>30-Day Survival Plan</Text>
+                    <View style={styles.survivalList}>
+                        {recoveryPlan.survivalPlan.map((step, index) => (
+                            <View key={index} style={styles.survivalItem}>
+                                <View style={styles.survivalBullet} />
+                                <Text style={styles.survivalText}>{step}</Text>
+                            </View>
+                        ))}
+                    </View>
+                </View>
+
                 {/* C. How to Recover the Lost Money */}
                 <View style={styles.sectionCard}>
                     <Text style={styles.sectionTitle}>C. How to Recover the Lost Money</Text>
@@ -274,7 +287,7 @@ export const RecoveryPlanScreen: React.FC<RecoveryPlanScreenProps> = ({
                 {/* Done Button */}
                 <TouchableOpacity
                     style={styles.doneButton}
-                    onPress={() => navigation.navigate('Home')}
+                    onPress={() => navigation.navigate('Main')}
                     activeOpacity={0.8}
                 >
                     <Text style={styles.doneButtonText}>Got It!</Text>
@@ -558,6 +571,29 @@ const styles = StyleSheet.create({
         fontSize: 17,
         fontWeight: '700',
         color: '#FFFFFF',
+    },
+
+    // Survival Plan
+    survivalList: {
+        gap: 16,
+    },
+    survivalItem: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        gap: 12,
+    },
+    survivalBullet: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: '#32D483',
+        marginTop: 6,
+    },
+    survivalText: {
+        flex: 1,
+        fontSize: 15,
+        color: '#1A1A1A',
+        lineHeight: 21,
     },
 
     bottomPadding: {
