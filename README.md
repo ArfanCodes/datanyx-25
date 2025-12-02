@@ -1,4 +1,4 @@
-# 💰 Datanyx - AI-Powered Financial Intelligence Platform
+# 💰 Peso - AI-Powered Financial Intelligence Platform
 
 > Your personal finance companion powered by AI, helping you achieve financial stability through intelligent insights and gamification.
 
